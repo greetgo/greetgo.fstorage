@@ -24,11 +24,6 @@ public class FileDot {
    */
   public Date createdAt;
   
-  /**
-   * Размер файла (может не использоваться)
-   */
-  public Integer size;
-  
   public FileDot() {}
   
   public FileDot(String filename, byte[] data) {

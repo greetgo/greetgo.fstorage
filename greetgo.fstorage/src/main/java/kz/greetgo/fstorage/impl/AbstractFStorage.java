@@ -9,6 +9,7 @@ import java.util.Date;
 import javax.sql.DataSource;
 
 import kz.greetgo.fstorage.FStorage;
+import kz.greetgo.fstorage.FStorageConfig;
 import kz.greetgo.fstorage.FileDot;
 import kz.greetgo.util.ServerUtil;
 
@@ -138,9 +139,6 @@ public abstract class AbstractFStorage implements FStorage {
             .append(" default " + currentTimestampFunc() + " not null,");
       }
       sql.append("  filename ").append(fieldTypeFilename()).append(',');
-      if (config.hasSize) {
-        sql.append("  size1 ").append(fieldTypeSize()).append(',');
-      }
       sql.append("  data ").append(fieldTypeData());
       sql.append(')');
       
@@ -165,25 +163,13 @@ public abstract class AbstractFStorage implements FStorage {
   private int insertFileDot(Connection con, long id, FileDot fileDot) throws Exception {
     StringBuilder ins = new StringBuilder();
     ins.append("insert into ").append(table(id));
-    ins.append(" (id,filename,");
-    if (config.hasSize) {
-      ins.append("size1,");
-    }
-    ins.append("data) values (?,?,");
-    if (config.hasSize) {
-      ins.append("?,");
-    }
-    ins.append("?)");
+    ins.append(" (id,filename,data) values (?,?,?)");
     
     PreparedStatement ps = con.prepareStatement(ins.toString());
     try {
-      int i = 1;
-      ps.setLong(i++, id);
-      ps.setString(i++, fileDot.filename);
-      if (config.hasSize) {
-        ps.setInt(i++, fileDot.data.length);
-      }
-      ps.setBytes(i++, fileDot.data);
+      ps.setLong(1, id);
+      ps.setString(2, fileDot.filename);
+      ps.setBytes(3, fileDot.data);
       return ps.executeUpdate();
     } finally {
       ps.close();
@@ -210,9 +196,6 @@ public abstract class AbstractFStorage implements FStorage {
         FileDot ret = new FileDot(rs.getString("filename"), rs.getBytes("data"));
         if (config.hasCreatedAt) {
           ret.createdAt = new Date(rs.getTimestamp("createdAt").getTime());
-        }
-        if (config.hasSize) {
-          ret.size = rs.getInt("size1");
         }
         return ret;
       } finally {

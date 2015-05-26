@@ -2,8 +2,8 @@ package kz.greetgo.fstorage.impl.oracle;
 
 import javax.sql.DataSource;
 
+import kz.greetgo.fstorage.FStorageConfig;
 import kz.greetgo.fstorage.impl.AbstractFStorage;
-import kz.greetgo.fstorage.impl.FStorageConfig;
 
 public class FStorageOracle extends AbstractFStorage {
   

@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import kz.greetgo.fstorage.impl.AbstractFStorage;
-import kz.greetgo.fstorage.impl.FStorageConfig;
 import kz.greetgo.fstorage.impl.oracle.FStorageOracle;
 import kz.greetgo.fstorage.impl.postgres.FStoragePostgres;
 import kz.greetgo.util.db.DbType;

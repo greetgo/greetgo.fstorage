@@ -10,8 +10,6 @@ import java.util.Random;
 
 import javax.sql.DataSource;
 
-import kz.greetgo.fstorage.impl.FStorageConfig;
-
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -48,10 +46,8 @@ public class FStorageTest extends MyTestBase {
     for (Object[] mas : dataProvider()) {
       Object dataSorce = mas[0];
       
-      ret.add(new Object[] { dataSorce, false, false });
-      ret.add(new Object[] { dataSorce, true, false });
-      ret.add(new Object[] { dataSorce, false, true });
-      ret.add(new Object[] { dataSorce, true, true });
+      ret.add(new Object[] { dataSorce, false });
+      ret.add(new Object[] { dataSorce, true });
       
     }
     
@@ -59,8 +55,7 @@ public class FStorageTest extends MyTestBase {
   }
   
   @Test(dataProvider = "addNewFile_getFile_DP")
-  public void addNewFile_getFile(DataSource dataSource, boolean hasCreatedAt, boolean hasSize)
-      throws Exception {
+  public void addNewFile_getFile(DataSource dataSource, boolean hasCreatedAt) throws Exception {
     Random rnd = new Random();
     
     final List<LocalFileDot> lfdList = new ArrayList<>();
@@ -79,7 +74,6 @@ public class FStorageTest extends MyTestBase {
     f.setDataSource(dataSource);
     FStorageConfig config = new FStorageConfig("test_file_table", 10);
     config.hasCreatedAt = hasCreatedAt;
-    config.hasSize = hasSize;
     f.setConfig(config);
     
     dropAllTables(dataSource.getConnection(), "test_file_table", 10);
@@ -97,10 +91,6 @@ public class FStorageTest extends MyTestBase {
       assertThat(fd.data).isEqualTo(lfd.data);
       if (hasCreatedAt) {
         assertThat(fd.createdAt).isNotNull();
-      }
-      if (hasSize) {
-        assertThat(fd.size).isNotNull();
-        assertThat(fd.size).isEqualTo(lfd.data.length);
       }
     }
   }
