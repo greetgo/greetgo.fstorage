@@ -21,7 +21,8 @@ public abstract class MyTestBase extends TestBase {
   
   @Override
   protected String dbSchema() {
-    return "greetgo_fstorage";
+    return System.getProperty("user.name") + "_ggfstor";
+    
   }
   
 }

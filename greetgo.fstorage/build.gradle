@@ -5,7 +5,7 @@ apply plugin: 'maven'
 group = 'kz.greetgo'
 
 sourceCompatibility = 1.7
-version = '0.0.1'
+version = '0.1.0'
 
 def nowDate = new Date()
 def nowFormattedDate = nowDate.format("yyyy-MM-dd/HH:mm:ss")
@@ -67,7 +67,7 @@ repositories {
 
 dependencies {
   //compile 'org.slf4j:log4j-over-slf4j:1.7.5'
-  //compile 'kz.greetgo:greetgo.util:0.0.6'
+  compile 'kz.greetgo:greetgo.util:0.0.6'
 
   testCompile 'org.testng:testng:6.1.1'
   testCompile 'org.easytesting:fest-assert-core:2.0M10'

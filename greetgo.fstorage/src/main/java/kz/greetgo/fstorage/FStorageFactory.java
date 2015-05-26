@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import kz.greetgo.fstorage.impl.AbstractFStorage;
+import kz.greetgo.fstorage.impl.FStorageConfig;
 import kz.greetgo.fstorage.impl.oracle.FStorageOracle;
 import kz.greetgo.fstorage.impl.postgres.FStoragePostgres;
 import kz.greetgo.util.db.DbType;
@@ -14,8 +15,11 @@ import kz.greetgo.util.db.DbType;
 public class FStorageFactory {
   private int fieldFilenameLen = 300;
   private DataSource dataSource = null;
-  private String tableName = null;
-  private int tableCount = 0;
+  private FStorageConfig config;
+  
+  public void setConfig(FStorageConfig config) {
+    this.config = config;
+  }
   
   public int getFieldFilenameLen() {
     return fieldFilenameLen;
@@ -34,19 +38,11 @@ public class FStorageFactory {
   }
   
   public String getTableName() {
-    return tableName;
-  }
-  
-  public void setTableName(String tableName) {
-    this.tableName = tableName;
+    return config.tableName;
   }
   
   public int getTableCount() {
-    return tableCount;
-  }
-  
-  public void setTableCount(int tableCount) {
-    this.tableCount = tableCount;
+    return config.tableCount;
   }
   
   public FStorage create() throws SQLException {
@@ -55,10 +51,10 @@ public class FStorageFactory {
     
     switch (dbType) {
     case PostgreSQL:
-      return prepare(new FStoragePostgres(dataSource, tableName, tableCount));
+      return prepare(new FStoragePostgres(dataSource, config));
       
     case Oracle:
-      return prepare(new FStorageOracle(dataSource, tableName, tableCount));
+      return prepare(new FStorageOracle(dataSource, config));
       
     default:
       throw new IllegalArgumentException("Cannot create FStorage for DbType = " + dbType);
@@ -73,7 +69,9 @@ public class FStorageFactory {
   
   private void check() {
     if (dataSource == null) throw new UnsetProperty("dataSource");
-    if (tableName == null) throw new UnsetProperty("tableName");
-    if (tableCount <= 0) throw new UnsetProperty("tableCount");
+    if (config == null) throw new UnsetProperty("config");
+    if (config.tableName == null) throw new UnsetProperty("config.tableName");
+    if (config.tableCount <= 0) throw new UnsetProperty("config.tableCount");
   }
+  
 }

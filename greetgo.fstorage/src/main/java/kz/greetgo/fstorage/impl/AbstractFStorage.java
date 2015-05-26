@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 
 import javax.sql.DataSource;
 
@@ -13,31 +14,30 @@ import kz.greetgo.util.ServerUtil;
 
 public abstract class AbstractFStorage implements FStorage {
   protected final DataSource dataSource;
-  protected final String tableName;
-  protected final int tableCount;
+  
+  protected final FStorageConfig config;
   
   public int fieldFilenameLen = 300;
   
-  public AbstractFStorage(DataSource dataSource, String tableName, int tableCount) {
+  public AbstractFStorage(DataSource dataSource, FStorageConfig config) {
     this.dataSource = dataSource;
-    this.tableName = tableName;
-    this.tableCount = tableCount;
+    this.config = config;
   }
   
   private String table(long id) {
     int size = 0;
     {
-      int a = tableCount;
+      int a = config.tableCount;
       while (a > 0) {
         size++;
         a = a / 10;
       }
     }
-    String nom = "" + (id % tableCount);
+    String nom = "" + (id % config.tableCount);
     while (nom.length() < size) {
       nom = "0" + nom;
     }
-    return tableName + tableCount + '_' + nom;
+    return config.tableName + config.tableCount + '_' + nom;
   }
   
   @Override
@@ -61,7 +61,7 @@ public abstract class AbstractFStorage implements FStorage {
   protected abstract String nextIdSql(String sequenceName);
   
   private long nextId(Connection con) throws Exception {
-    PreparedStatement ps = con.prepareStatement(nextIdSql(tableName + "_seq"));
+    PreparedStatement ps = con.prepareStatement(nextIdSql(config.tableName + "_seq"));
     try {
       ResultSet rs = ps.executeQuery();
       try {
@@ -114,22 +114,36 @@ public abstract class AbstractFStorage implements FStorage {
   
   protected abstract String fieldTypeData();
   
+  protected abstract String fieldTypeCreatedAt();
+  
+  protected abstract String fieldTypeSize();
+  
+  protected abstract String currentTimestampFunc();
+  
   private void createTable(Connection con) throws Exception {
     {
-      PreparedStatement ps = con.prepareStatement("create sequence " + tableName + "_seq");
+      PreparedStatement ps = con.prepareStatement("create sequence " + config.tableName + "_seq");
       try {
         ps.executeUpdate();
       } finally {
         ps.close();
       }
     }
-    for (int i = 0, C = tableCount; i < C; i++) {
+    for (int i = 0, C = config.tableCount; i < C; i++) {
       StringBuilder sql = new StringBuilder();
       sql.append("create table ").append(table(i)).append('(');
       sql.append("  id ").append(fieldTypeId()).append(" not null primary key,");
+      if (config.hasCreatedAt) {
+        sql.append("  createdAt ").append(fieldTypeCreatedAt())
+            .append(" default " + currentTimestampFunc() + " not null,");
+      }
       sql.append("  filename ").append(fieldTypeFilename()).append(',');
+      if (config.hasSize) {
+        sql.append("  size1 ").append(fieldTypeSize()).append(',');
+      }
       sql.append("  data ").append(fieldTypeData());
       sql.append(')');
+      
       PreparedStatement ps = con.prepareStatement(sql.toString());
       try {
         ps.executeUpdate();
@@ -149,12 +163,27 @@ public abstract class AbstractFStorage implements FStorage {
   }
   
   private int insertFileDot(Connection con, long id, FileDot fileDot) throws Exception {
-    PreparedStatement ps = con.prepareStatement("insert into " + table(id)
-        + " (id,filename,data)values(?,?,?)");
+    StringBuilder ins = new StringBuilder();
+    ins.append("insert into ").append(table(id));
+    ins.append(" (id,filename,");
+    if (config.hasSize) {
+      ins.append("size1,");
+    }
+    ins.append("data) values (?,?,");
+    if (config.hasSize) {
+      ins.append("?,");
+    }
+    ins.append("?)");
+    
+    PreparedStatement ps = con.prepareStatement(ins.toString());
     try {
-      ps.setLong(1, id);
-      ps.setString(2, fileDot.filename);
-      ps.setBytes(3, fileDot.data);
+      int i = 1;
+      ps.setLong(i++, id);
+      ps.setString(i++, fileDot.filename);
+      if (config.hasSize) {
+        ps.setInt(i++, fileDot.data.length);
+      }
+      ps.setBytes(i++, fileDot.data);
       return ps.executeUpdate();
     } finally {
       ps.close();
@@ -178,7 +207,14 @@ public abstract class AbstractFStorage implements FStorage {
       try {
         if (!rs.next()) return null;
         
-        return new FileDot(rs.getString("filename"), rs.getBytes("data"));
+        FileDot ret = new FileDot(rs.getString("filename"), rs.getBytes("data"));
+        if (config.hasCreatedAt) {
+          ret.createdAt = new Date(rs.getTimestamp("createdAt").getTime());
+        }
+        if (config.hasSize) {
+          ret.size = rs.getInt("size1");
+        }
+        return ret;
       } finally {
         rs.close();
       }

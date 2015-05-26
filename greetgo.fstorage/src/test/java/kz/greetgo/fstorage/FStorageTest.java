@@ -10,6 +10,9 @@ import java.util.Random;
 
 import javax.sql.DataSource;
 
+import kz.greetgo.fstorage.impl.FStorageConfig;
+
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class FStorageTest extends MyTestBase {
@@ -37,8 +40,27 @@ public class FStorageTest extends MyTestBase {
     return (byte)rnd.nextInt(256);
   }
   
-  @Test(dataProvider = DATA_PROVIDER)
-  public void addNewFile_getFile(DataSource dataSource) throws Exception {
+  @DataProvider
+  public Object[][] addNewFile_getFile_DP() throws Exception {
+    
+    List<Object[]> ret = new ArrayList<>();
+    
+    for (Object[] mas : dataProvider()) {
+      Object dataSorce = mas[0];
+      
+      ret.add(new Object[] { dataSorce, false, false });
+      ret.add(new Object[] { dataSorce, true, false });
+      ret.add(new Object[] { dataSorce, false, true });
+      ret.add(new Object[] { dataSorce, true, true });
+      
+    }
+    
+    return ret.toArray(new Object[ret.size()][]);
+  }
+  
+  @Test(dataProvider = "addNewFile_getFile_DP")
+  public void addNewFile_getFile(DataSource dataSource, boolean hasCreatedAt, boolean hasSize)
+      throws Exception {
     Random rnd = new Random();
     
     final List<LocalFileDot> lfdList = new ArrayList<>();
@@ -55,9 +77,10 @@ public class FStorageTest extends MyTestBase {
     
     FStorageFactory f = new FStorageFactory();
     f.setDataSource(dataSource);
-    f.setFieldFilenameLen(100);
-    f.setTableCount(10);
-    f.setTableName("test_file_table");
+    FStorageConfig config = new FStorageConfig("test_file_table", 10);
+    config.hasCreatedAt = hasCreatedAt;
+    config.hasSize = hasSize;
+    f.setConfig(config);
     
     dropAllTables(dataSource.getConnection(), "test_file_table", 10);
     
@@ -72,6 +95,13 @@ public class FStorageTest extends MyTestBase {
       assertThat(fd).isNotNull();
       assertThat(fd.filename).isEqualTo(lfd.filename);
       assertThat(fd.data).isEqualTo(lfd.data);
+      if (hasCreatedAt) {
+        assertThat(fd.createdAt).isNotNull();
+      }
+      if (hasSize) {
+        assertThat(fd.size).isNotNull();
+        assertThat(fd.size).isEqualTo(lfd.data.length);
+      }
     }
   }
   
