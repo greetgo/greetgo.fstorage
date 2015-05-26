@@ -18,9 +18,22 @@ jar {
   }
 }
 
+eclipse.project.natures 'org.springsource.ide.eclipse.gradle.core.nature'
+
+
+compileJava {
+  options.encoding = "UTF-8"
+}
+compileTestJava {
+  options.encoding = "UTF-8"
+}
+
 sourceSets {
   main {
     resources.srcDirs = ["src/main/java", "src/main/resources"]
+  }
+  test {
+    resources.srcDirs = ["src/test/java", "src/test/resources"]
   }
 }
 
@@ -33,8 +46,6 @@ eclipse {
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
   }
-
-  pathVariables 'GRADLE_USER_HOME': gradle.gradleUserHomeDir
 }
 
 project.eclipse.classpath.file.whenMerged { cp ->
@@ -50,14 +61,13 @@ project.eclipse.classpath.file.whenMerged { cp ->
 repositories {
   maven {
     name 'Our repository'
-    url 'http://192.168.0.1:8080/repository/internal/'
+    url 'http://192.168.11.11:8080/repository/internal/'
   }
-  mavenCentral()
 }
 
 dependencies {
   //compile 'org.slf4j:log4j-over-slf4j:1.7.5'
-  compile 'kz.greetgo:greetgo.util:0.0.6'
+  //compile 'kz.greetgo:greetgo.util:0.0.6'
 
   testCompile 'org.testng:testng:6.1.1'
   testCompile 'org.easytesting:fest-assert-core:2.0M10'
@@ -92,7 +102,7 @@ uploadArchives {
   repositories.mavenDeployer {
     configuration = configurations.archives
     repository(
-      url: 'http://192.168.0.1:8080/repository/internal/'
+      url: 'http://192.168.11.11:8080/repository/internal/'
     )
 
     pom.project {
