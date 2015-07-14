@@ -20,7 +20,6 @@ jar {
 
 eclipse.project.natures 'org.springsource.ide.eclipse.gradle.core.nature'
 
-
 compileJava {
   options.encoding = "UTF-8"
 }
