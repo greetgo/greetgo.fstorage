@@ -12,6 +12,7 @@ import kz.greetgo.fstorage.FStorage;
 import kz.greetgo.fstorage.FStorageConfig;
 import kz.greetgo.fstorage.FileDot;
 import kz.greetgo.util.ServerUtil;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public abstract class AbstractFStorage implements FStorage {
   protected final DataSource dataSource;
@@ -121,6 +122,7 @@ public abstract class AbstractFStorage implements FStorage {
   
   protected abstract String currentTimestampFunc();
   
+  @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
   private void createTable(Connection con) throws Exception {
     {
       PreparedStatement ps = con.prepareStatement("create sequence " + config.tableName + "_seq");
@@ -142,11 +144,8 @@ public abstract class AbstractFStorage implements FStorage {
       sql.append("  data ").append(fieldTypeData());
       sql.append(')');
       
-      PreparedStatement ps = con.prepareStatement(sql.toString());
-      try {
+      try (PreparedStatement ps = con.prepareStatement(sql.toString())) {
         ps.executeUpdate();
-      } finally {
-        ps.close();
       }
     }
   }
