@@ -11,3 +11,6 @@
 /war
 /gwt-unitCache
 /*.log
+*.iml
+*.ipr
+*.iws
