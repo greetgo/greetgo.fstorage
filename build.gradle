@@ -5,8 +5,8 @@ apply plugin: 'idea'
 
 group = 'kz.greetgo'
 
-sourceCompatibility = 1.7
-version = '0.1.1'
+sourceCompatibility = 1.8
+version = '1.0.0'
 
 def nowDate = new Date()
 def nowFormattedDate = nowDate.format("yyyy-MM-dd/HH:mm:ss")
@@ -21,21 +21,13 @@ jar {
 
 eclipse.project.natures 'org.springsource.ide.eclipse.gradle.core.nature'
 
-compileJava {
-  options.encoding = "UTF-8"
-}
-compileTestJava {
-  options.encoding = "UTF-8"
-}
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
 
-sourceSets {
-  main {
-    resources.srcDirs = ["src/main/java", "src/main/resources"]
-  }
-  test {
-    resources.srcDirs = ["src/test/java", "src/test/resources"]
-  }
-}
+sourceSets.main.java.srcDirs = ["src"]
+sourceSets.main.resources.srcDirs = ["src", "src_resources"]
+sourceSets.test.java.srcDirs = ["test_src"]
+sourceSets.test.resources.srcDirs = ["test_src", "test_resources"]
 
 eclipse {
   jdt {
@@ -43,8 +35,8 @@ eclipse {
     // if you want to alter the java versions (by default they are configured with
     // gradle java plugin settings):
     //
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
   }
 }
 
