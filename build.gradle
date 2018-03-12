@@ -6,16 +6,18 @@ apply plugin: 'idea'
 group = 'kz.greetgo'
 
 sourceCompatibility = 1.8
-version = '1.0.0'
+version = '2.0.0'
 
 def nowDate = new Date()
 def nowFormattedDate = nowDate.format("yyyy-MM-dd/HH:mm:ss")
 
 jar {
   manifest {
-    attributes 'Implementation-Title': project.name,
-      'Implementation-Version': version, 'Implementation-Vendor': 'greetgo!',
-      'Built-By': System.getProperty("user.name"), 'Built-At': nowFormattedDate
+    attributes 'Implementation-Title': project.name
+    attributes 'Implementation-Version': version
+    attributes 'Implementation-Vendor': 'greetgo!'
+    attributes 'Built-By': System.getProperty("user.name")
+    attributes 'Built-At': nowFormattedDate
   }
 }
 
@@ -45,25 +47,25 @@ project.eclipse.classpath.file.whenMerged { cp ->
     cp.entries.findAll { it.path.contains('JRE_CONTAINER') }.each {
 
       it.path += "/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/" +
-          "JavaSE-$project.sourceCompatibility"
+        "JavaSE-$project.sourceCompatibility"
     }
   }
 }
 
 repositories {
-  maven {
-    name 'Our repository'
-    url System.getenv('GG_REPO')
-  }
+  maven { url System.getenv('GG_REPO') }
 }
 
 dependencies {
   //compile 'org.slf4j:log4j-over-slf4j:1.7.5'
   compile 'kz.greetgo:greetgo.util:0.0.6'
-  
+
   compile 'com.google.code.findbugs:annotations:2.0.1'
 
-  testCompile 'org.testng:testng:6.1.1'
+  //TODO переложить драйвер на уровень тестов
+  compile group: 'org.postgresql', name: 'postgresql', version: '9.4-1202-jdbc42'
+
+  testCompile 'org.testng:testng:6.5.1'
   testCompile 'org.easytesting:fest-assert-core:2.0M10'
 
   testCompile 'postgresql:postgresql:9.1-901.jdbc4'
