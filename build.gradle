@@ -62,8 +62,7 @@ dependencies {
 
   compile 'com.google.code.findbugs:annotations:2.0.1'
 
-  //TODO переложить драйвер на уровень тестов
-  compile group: 'org.postgresql', name: 'postgresql', version: '9.4-1202-jdbc42'
+  testCompile group: 'org.postgresql', name: 'postgresql', version: '9.4-1202-jdbc42'
 
   testCompile 'org.testng:testng:6.5.1'
   testCompile 'org.easytesting:fest-assert-core:2.0M10'

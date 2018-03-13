@@ -2,7 +2,6 @@ package kz.greetgo.file_storage.impl;
 
 import kz.greetgo.file_storage.errors.FileIdAlreadyExists;
 import kz.greetgo.file_storage.impl.jdbc.Inserting;
-import org.postgresql.util.PSQLException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -55,7 +54,7 @@ public class StorageDaoPostgres extends AbstractStorageDao {
             .fieldTimestamp("__paramsTableLastModifiedAt__", params.lastModifiedAt, true)
             .go()
           ;
-        } catch (PSQLException e) {
+        } catch (SQLException e) {
           if ("23505".equals(e.getSQLState())) throw new FileIdAlreadyExists(id);
           throw e;
         }
@@ -84,9 +83,8 @@ public class StorageDaoPostgres extends AbstractStorageDao {
   }
 
   private static RuntimeException prepareException(SQLException e) {
-    if (e instanceof PSQLException) {
-      PSQLException er = (PSQLException) e;
-      String sqlState = er.getSQLState();
+    {
+      String sqlState = e.getSQLState();
       if ("42P01".equals(sqlState)) throw new DatabaseNotPrepared();
     }
     return new RuntimeException(e);
