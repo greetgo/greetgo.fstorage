@@ -1,12 +1,10 @@
 package kz.greetgo.file_storage.impl.jdbc;
 
-import kz.greetgo.file_storage.impl.FileStorageLogger;
 import kz.greetgo.file_storage.impl.jdbc.model.Field;
 import kz.greetgo.file_storage.impl.jdbc.model.FieldWithExpr;
 import kz.greetgo.file_storage.impl.jdbc.model.FieldWithValue;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -20,14 +18,6 @@ public class Inserting {
 
   private final Connection connection;
   private Function<String, String> sqlPreparation = (s) -> s;
-
-  private static String view(String sql) {
-    if (FileStorageLogger.isTraceEnabled()) {
-      FileStorageLogger.traceSQL(sql);
-    }
-    return sql;
-  }
-
 
   private Inserting(Connection connection) {
     this.connection = connection;
@@ -60,6 +50,7 @@ public class Inserting {
       return this;
     }
 
+    @SuppressWarnings("unused")
     public InsertInto fieldSkipNull(String fieldName, Object fieldValue) {
       if (fieldValue != null) fields.add(new FieldWithValue(fieldName, fieldValue));
       return this;
@@ -71,12 +62,14 @@ public class Inserting {
       return this;
     }
 
+    @SuppressWarnings("unused")
     public InsertInto fieldExpr(String fieldName, String fieldExpression) {
       fields.add(new FieldWithExpr(fieldName, fieldExpression));
       return this;
     }
 
-    public void go() throws SQLException {
+    @SuppressWarnings("UnusedReturnValue")
+    public int go() throws SQLException {
       StringBuilder sql = new StringBuilder("insert into " + table + " (");
       sql.append(fields.stream().map(f -> f.name).collect(Collectors.joining(", ")));
       sql.append(") values (");
@@ -84,24 +77,16 @@ public class Inserting {
       sql.append(")");
       appendToEnd.forEach(s -> sql.append(' ').append(s));
 
-      try (PreparedStatement ps = connection.prepareStatement(view(sqlPreparation.apply(sql.toString())))) {
+      try (Query query = new Query(connection)) {
 
-        int index = 1;
-        //noinspection Duplicates
-        for (Object value : fields.stream()
+        query.sql = sqlPreparation.apply(sql.toString());
+
+        query.params = fields.stream()
           .filter(f -> f instanceof FieldWithValue)
           .map(f -> ((FieldWithValue) f).value)
-          .collect(Collectors.toList())
-          ) {
-          ps.setObject(index, value);
-          if (FileStorageLogger.isTraceEnabled()) {
-            FileStorageLogger.traceSqlParam(index, value);
-          }
-          index++;
-        }
+          .collect(Collectors.toList());
 
-
-        ps.executeUpdate();
+        return query.update();
       }
 
     }

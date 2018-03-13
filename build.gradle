@@ -57,10 +57,10 @@ repositories {
 }
 
 dependencies {
-  //compile 'org.slf4j:log4j-over-slf4j:1.7.5'
+
   compile 'kz.greetgo:greetgo.util:0.0.6'
 
-  compile 'com.google.code.findbugs:annotations:2.0.1'
+  testCompile group: 'log4j', name: 'log4j', version: '1.2.17'
 
   testCompile group: 'org.postgresql', name: 'postgresql', version: '9.4-1202-jdbc42'
 

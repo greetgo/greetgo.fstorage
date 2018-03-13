@@ -2,12 +2,10 @@ package kz.greetgo.file_storage.impl;
 
 import kz.greetgo.file_storage.errors.FileIdAlreadyExists;
 import kz.greetgo.file_storage.impl.jdbc.Inserting;
+import kz.greetgo.file_storage.impl.jdbc.Query;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 public class StorageDaoPostgres extends AbstractStorageDao {
   StorageDaoPostgres(FileStorageBuilderDbImpl builder) {
@@ -94,21 +92,19 @@ public class StorageDaoPostgres extends AbstractStorageDao {
     int idLen = builder.parent.fileIdLength;
     try (Connection connection = builder.dataSource.getConnection()) {
 
-      try (Statement st = connection.createStatement()) {
-        st.execute(FileStorageLogger.view(sql("create table __dataTable__ (" +
+      try (Query query = new Query(connection)) {
+        query.exec(sql("create table __dataTable__ (" +
           "   __dataTableId__   varchar(40) not null primary key" +
           ",  __dataTableData__ bytea" +
-          ")")));
-      }
+          ")"));
 
-      try (Statement st = connection.createStatement()) {
-        st.execute(FileStorageLogger.view(sql("create table __paramsTable__ (" +
+        query.exec(sql("create table __paramsTable__ (" +
           "   __paramsTableId__      varchar(" + idLen + ") not null primary key" +
           ",  __paramsTableName__    varchar(" + builder.paramsTableNameLength + ")" +
           ",  __paramsTableMimeType__    varchar(" + builder.paramsTableMimeTypeLength + ")" +
           ",  __paramsTableDataId__  varchar(40) not null references __dataTable__" +
           ",  __paramsTableLastModifiedAt__  timestamp not null default current_timestamp" +
-          ")")));
+          ")"));
       }
 
     }
@@ -127,26 +123,21 @@ public class StorageDaoPostgres extends AbstractStorageDao {
   protected FileParams readParamsEx(String fileId) throws SQLException {
     try (Connection connection = builder.dataSource.getConnection()) {
 
-      try (PreparedStatement ps = connection.prepareStatement(sql(
-        "select * from __paramsTable__ where __paramsTableId__ = ?"))) {
+      try (Query query = new Query(connection)) {
+        query.sql = sql("select * from __paramsTable__ where __paramsTableId__ = ?");
+        query.params.add(fileId);
 
-        ps.setString(1, fileId);
+        if (!query.rs().next()) return null;
 
-        try (ResultSet rs = ps.executeQuery()) {
+        FileParams ret = new FileParams();
 
-          if (!rs.next()) return null;
+        ret.id = query.rs().getString(builder.getParamsTableId());
+        ret.sha1sum = query.rs().getString(builder.getParamsTableDataId());
+        ret.name = query.rs().getString(builder.getParamsTableName());
+        ret.mimeType = query.rs().getString(builder.getParamsTableMimeType());
+        ret.lastModifiedBy = query.rs().getTimestamp(builder.getParamsTableLastModifiedAt());
 
-          FileParams ret = new FileParams();
-
-          ret.id = rs.getString(builder.getParamsTableId());
-          ret.sha1sum = rs.getString(builder.getParamsTableDataId());
-          ret.name = rs.getString(builder.getParamsTableName());
-          ret.mimeType = rs.getString(builder.getParamsTableMimeType());
-          ret.lastModifiedBy = rs.getTimestamp(builder.getParamsTableLastModifiedAt());
-
-          return ret;
-        }
-
+        return ret;
       }
 
     }
@@ -165,18 +156,11 @@ public class StorageDaoPostgres extends AbstractStorageDao {
   protected byte[] getDataAsArrayEx(String sha1sum) throws SQLException {
     try (Connection connection = builder.dataSource.getConnection()) {
 
-      try (PreparedStatement ps = connection.prepareStatement(sql(
-        "select __dataTableData__ from __dataTable__ where __dataTableId__ = ?"))) {
-
-        ps.setString(1, sha1sum);
-
-        try (ResultSet rs = ps.executeQuery()) {
-
-          if (!rs.next()) throw new RuntimeException("No data for sha1sum = " + sha1sum);
-
-          return rs.getBytes(1);
-        }
-
+      try (Query query = new Query(connection)) {
+        query.sql = sql("select __dataTableData__ from __dataTable__ where __dataTableId__ = ?");
+        query.params.add(sha1sum);
+        if (!query.rs().next()) throw new RuntimeException("No data for sha1sum = " + sha1sum);
+        return query.rs().getBytes(1);
       }
 
     }

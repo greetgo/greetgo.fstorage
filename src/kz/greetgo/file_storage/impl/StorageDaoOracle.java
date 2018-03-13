@@ -3,11 +3,10 @@ package kz.greetgo.file_storage.impl;
 import kz.greetgo.file_storage.errors.FileIdAlreadyExists;
 import kz.greetgo.file_storage.errors.Ora00972_IdentifierIsTooLong;
 import kz.greetgo.file_storage.impl.jdbc.Inserting;
+import kz.greetgo.file_storage.impl.jdbc.Query;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 public class StorageDaoOracle extends StorageDaoPostgres {
   StorageDaoOracle(FileStorageBuilderDbImpl builder) {
@@ -52,11 +51,11 @@ public class StorageDaoOracle extends StorageDaoPostgres {
           sql.append("insert into __dataTable__ (__dataTableId__, __dataTableData__)");
           sql.append(" values (?, ?)");
 
-          try (PreparedStatement ps = connection.prepareStatement(sql(sql.toString()))) {
-            ps.setString(1, sha1sum);
-            ps.setBytes(2, data);
-            System.out.println("data.length = " + data.length);
-            ps.executeUpdate();
+          try (Query query = new Query(connection)) {
+            query.sql = sql(sql.toString());
+            query.params.add(sha1sum);
+            query.params.add(data);
+            query.update();
           }
 
         } catch (Exception e) {
@@ -122,21 +121,19 @@ public class StorageDaoOracle extends StorageDaoPostgres {
     int idLen = builder.parent.fileIdLength;
     try (Connection connection = builder.dataSource.getConnection()) {
 
-      try (Statement st = connection.createStatement()) {
-        st.execute(FileStorageLogger.view(sql("create table __dataTable__ (" +
+      try (Query query = new Query(connection)) {
+        query.exec(sql("create table __dataTable__ (" +
           "   __dataTableId__   varchar2(40) not null primary key" +
           ",  __dataTableData__ blob" +
-          ")")));
-      }
+          ")"));
 
-      try (Statement st = connection.createStatement()) {
-        st.execute(FileStorageLogger.view(sql("create table __paramsTable__ (" +
+        query.exec(sql("create table __paramsTable__ (" +
           "   __paramsTableId__       varchar2(" + idLen + ") not null primary key" +
           ",  __paramsTableName__     varchar2(" + builder.paramsTableNameLength + ")" +
           ",  __paramsTableMimeType__ varchar2(" + builder.paramsTableMimeTypeLength + ")" +
           ",  __paramsTableDataId__   varchar2(40) not null references __dataTable__" +
           ",  __paramsTableLastModifiedAt__ timestamp default systimestamp not null" +
-          ")")));
+          ")"));
       }
 
     }
