@@ -7,6 +7,7 @@ import kz.greetgo.file_storage.errors.NoFileData;
 import kz.greetgo.file_storage.errors.NoFileMimeType;
 import kz.greetgo.file_storage.errors.NoFileName;
 import kz.greetgo.file_storage.errors.NoFileWithId;
+import kz.greetgo.file_storage.errors.Ora00972_IdentifierIsTooLong;
 import kz.greetgo.file_storage.errors.UnknownMimeType;
 import kz.greetgo.util.db.DbType;
 import org.fest.assertions.api.Assertions;
@@ -16,11 +17,29 @@ import org.testng.annotations.Test;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
 public class FileStorageBuilderDbTest {
+
+  public static final String FS2 = "fs2_a";
+
+  private DbType[] dbTypes() {
+    return new DbType[]{DbType.PostgreSQL, DbType.Oracle};
+  }
+
+  @DataProvider
+  public Object[][] dbTypeDataProvider() {
+    DbType[] dbTypes = dbTypes();
+    Object[][] ret = new Object[dbTypes.length][];
+    for (int i = 0; i < dbTypes.length; i++) {
+      ret[i] = new Object[]{dbTypes[i]};
+    }
+    return ret;
+  }
 
   @BeforeMethod
   public void setNewSqlLogger_to_FileStorageLogger() throws Exception {
@@ -42,12 +61,12 @@ public class FileStorageBuilderDbTest {
     });
   }
 
-  @Test
-  public void store_read() throws Exception {
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void store_read(DbType dbType) throws Exception {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(DbType.PostgreSQL, "_fs2"))
+      .inDb(TestUtil.createFrom(dbType, FS2))
       .build();
 
     String data = "Содержимое " + RND.str(400);
@@ -96,12 +115,12 @@ public class FileStorageBuilderDbTest {
     assertThat(fileId).isNotEqualTo(fileId2);
   }
 
-  @Test(expectedExceptions = NoFileWithId.class)
-  public void noId_immediately() throws Exception {
+  @Test(expectedExceptions = NoFileWithId.class, dataProvider = "dbTypeDataProvider")
+  public void noId_immediately(DbType dbType) throws Exception {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(DbType.PostgreSQL, "_fs2"))
+      .inDb(TestUtil.createFrom(dbType, FS2))
       .build();
 
     //
@@ -112,12 +131,12 @@ public class FileStorageBuilderDbTest {
 
   }
 
-  @Test(expectedExceptions = NoFileWithId.class)
-  public void noId() throws Exception {
+  @Test(expectedExceptions = NoFileWithId.class, dataProvider = "dbTypeDataProvider")
+  public void noId(DbType dbType) throws Exception {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(DbType.PostgreSQL, "_fs2"))
+      .inDb(TestUtil.createFrom(dbType, FS2))
       .build();
 
     //
@@ -128,12 +147,12 @@ public class FileStorageBuilderDbTest {
 
   }
 
-  @Test
-  public void readOrNull_noId_null() throws Exception {
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void readOrNull_noId_null(DbType dbType) throws Exception {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(DbType.PostgreSQL, "_fs2"))
+      .inDb(TestUtil.createFrom(dbType, FS2))
       .build();
 
     //
@@ -145,14 +164,14 @@ public class FileStorageBuilderDbTest {
     assertThat(dataReader).isNull();
   }
 
-  @Test
-  public void externalIdGenerator() throws Exception {
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void externalIdGenerator(DbType dbType) throws Exception {
     String prefix = RND.str(10);
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
       .idGenerator(20, () -> prefix + RND.str(10))
-      .inDb(TestUtil.createFrom(DbType.PostgreSQL, "_fs2"))
+      .inDb(TestUtil.createFrom(dbType, FS2))
       .build();
 
     //
@@ -171,14 +190,14 @@ public class FileStorageBuilderDbTest {
     assertThat(fileId).startsWith(prefix);
   }
 
-  @Test
-  public void bigExternalId() throws Exception {
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void bigExternalId(DbType dbType) throws Exception {
     String prefix = RND.str(100);
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
       .idGenerator(200, () -> prefix + RND.str(100))
-      .inDb(TestUtil.createFrom(DbType.PostgreSQL, "_fs2"))
+      .inDb(TestUtil.createFrom(dbType, FS2))
       .setDataTable("idLen200_data")
       .setParamsTable("idLen200_param")
       .build();
@@ -199,12 +218,12 @@ public class FileStorageBuilderDbTest {
     assertThat(fileId).startsWith(prefix);
   }
 
-  @Test
-  public void store_read_presetId() throws Exception {
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void store_read_presetId(DbType dbType) throws Exception {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(DbType.PostgreSQL, "_fs2"))
+      .inDb(TestUtil.createFrom(dbType, FS2))
       .build();
 
     String data = "Содержимое " + RND.str(400);
@@ -233,12 +252,12 @@ public class FileStorageBuilderDbTest {
     assertThat(reader.id()).isEqualTo(fileId);
   }
 
-  @Test
-  public void testFileIdAlreadyExists() throws Exception {
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void testFileIdAlreadyExists(DbType dbType) throws Exception {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(DbType.PostgreSQL, "_fs2"))
+      .inDb(TestUtil.createFrom(dbType, FS2))
       .build();
 
     String fileId = storage.storing()
@@ -263,13 +282,13 @@ public class FileStorageBuilderDbTest {
     }
   }
 
-  @Test
-  public void checkMimeTypeWithCustomLength() throws Exception {
-    String rnd = RND.intStr(17);
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void checkMimeTypeWithCustomLength(DbType dbType) throws Exception {
+    String rnd = RND.intStr(7);
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(DbType.PostgreSQL, "_fs2"))
+      .inDb(TestUtil.createFrom(dbType, FS2))
       .setDataTable("usingMimeType_data_" + rnd)
       .setParamsTable("usingMimeType_param_" + rnd)
       .setParamsTableMimeType("asd_mime_type_" + rnd)
@@ -297,17 +316,23 @@ public class FileStorageBuilderDbTest {
 
   @DataProvider
   public Object[][] nullAndEmpty() {
-    return new Object[][]{{null}, {""}};
+
+    List<Object[]> ret = new ArrayList<>();
+    for (DbType dbType : dbTypes()) {
+      ret.add(new Object[]{dbType, null});
+      ret.add(new Object[]{dbType, ""});
+    }
+    return ret.toArray(new Object[ret.size()][]);
   }
 
   @Test(expectedExceptions = NoFileMimeType.class, dataProvider = "nullAndEmpty")
-  public void checkMimeTypeMandatory(String nullAndEmpty) throws Exception {
-    String rnd = RND.intStr(17);
+  public void checkMimeTypeMandatory(DbType dbType, String nullAndEmpty) throws Exception {
+    String rnd = RND.intStr(7);
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
       .mandatoryMimeType(true)
-      .inDb(TestUtil.createFrom(DbType.PostgreSQL, "_fs2"))
+      .inDb(TestUtil.createFrom(dbType, FS2))
       .setDataTable("NoFileMimeType_data_" + rnd)
       .setParamsTable("NoFileMimeType_param_" + rnd)
       .setParamsTableMimeType("asd_mime_type_" + rnd)
@@ -324,13 +349,13 @@ public class FileStorageBuilderDbTest {
   }
 
   @Test(expectedExceptions = NoFileName.class, dataProvider = "nullAndEmpty")
-  public void checkNameMandatory(String nullAndEmpty) throws Exception {
-    String rnd = RND.intStr(17);
+  public void checkNameMandatory(DbType dbType, String nullAndEmpty) throws Exception {
+    String rnd = RND.intStr(7);
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
       .mandatoryName(true)
-      .inDb(TestUtil.createFrom(DbType.PostgreSQL, "_fs2"))
+      .inDb(TestUtil.createFrom(dbType, FS2))
       .setDataTable("NoFileName_data_" + rnd)
       .setParamsTable("NoFileName_param_" + rnd)
       .build();
@@ -345,13 +370,46 @@ public class FileStorageBuilderDbTest {
     //
   }
 
-  @Test(expectedExceptions = NoFileData.class)
-  public void checkDataMandatory() throws Exception {
+  @Test(expectedExceptions = Ora00972_IdentifierIsTooLong.class)
+  public void throw_Ora00972_IdentifierIsTooLong_setDataTable() throws Exception {
     String rnd = RND.intStr(17);
+
+    FileStorageBuilder
+      .newBuilder()
+      .inDb(TestUtil.createFrom(DbType.Oracle, FS2))
+      .setDataTable("name_is_very_very_very_long_" + rnd)
+      .build();
+  }
+
+  @Test(expectedExceptions = Ora00972_IdentifierIsTooLong.class)
+  public void throw_Ora00972_IdentifierIsTooLong_setParamsTableMimeType() throws Exception {
+    String rnd = RND.intStr(17);
+
+    FileStorageBuilder
+      .newBuilder()
+      .inDb(TestUtil.createFrom(DbType.Oracle, FS2))
+      .setParamsTableMimeType("name_is_very_very_very_long_" + rnd)
+      .build();
+  }
+
+  @Test(expectedExceptions = Ora00972_IdentifierIsTooLong.class)
+  public void throw_Ora00972_IdentifierIsTooLong_setParamsTable() throws Exception {
+    String rnd = RND.intStr(17);
+
+    FileStorageBuilder
+      .newBuilder()
+      .inDb(TestUtil.createFrom(DbType.Oracle, FS2))
+      .setParamsTable("name_is_very_very_very_long_" + rnd)
+      .build();
+  }
+
+  @Test(expectedExceptions = NoFileData.class, dataProvider = "dbTypeDataProvider")
+  public void checkDataMandatory(DbType dbType) throws Exception {
+    String rnd = RND.intStr(7);
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(DbType.PostgreSQL, "_fs2"))
+      .inDb(TestUtil.createFrom(dbType, FS2))
       .setDataTable("NoFileContent_data_" + rnd)
       .setParamsTable("NoFileContent_param_" + rnd)
       .build();
@@ -364,9 +422,9 @@ public class FileStorageBuilderDbTest {
   }
 
 
-  @Test
-  public void unknownMimeType() throws Exception {
-    String rnd = RND.intStr(17);
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void unknownMimeType(DbType dbType) throws Exception {
+    String rnd = RND.intStr(7);
 
     String actualMimeType[] = new String[]{null};
 
@@ -376,7 +434,7 @@ public class FileStorageBuilderDbTest {
         actualMimeType[0] = hereMimeType;
         return false;
       })
-      .inDb(TestUtil.createFrom(DbType.PostgreSQL, "_fs2"))
+      .inDb(TestUtil.createFrom(dbType, FS2))
       .setDataTable("NoFileContent_data_" + rnd)
       .setParamsTable("NoFileContent_param_" + rnd)
       .build();
@@ -401,9 +459,9 @@ public class FileStorageBuilderDbTest {
     assertThat(actualMimeType[0]).isEqualTo(mimeType);
   }
 
-  @Test
-  public void unknownMimeType_throwsSomeError() throws Exception {
-    String rnd = RND.intStr(17);
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void unknownMimeType_throwsSomeError(DbType dbType) throws Exception {
+    String rnd = RND.intStr(7);
 
     String actualMimeType[] = new String[]{null};
     String errorMessage = RND.str(10);
@@ -414,7 +472,7 @@ public class FileStorageBuilderDbTest {
         actualMimeType[0] = hereMimeType;
         throw new RuntimeException(errorMessage);
       })
-      .inDb(TestUtil.createFrom(DbType.PostgreSQL, "_fs2"))
+      .inDb(TestUtil.createFrom(dbType, FS2))
       .setDataTable("NoFileContent_data_" + rnd)
       .setParamsTable("NoFileContent_param_" + rnd)
       .build();
@@ -440,9 +498,9 @@ public class FileStorageBuilderDbTest {
     assertThat(actualMimeType[0]).isEqualTo(mimeType);
   }
 
-  @Test
-  public void unknownMimeType_throwsUnknownMimeType() throws Exception {
-    String rnd = RND.intStr(17);
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void unknownMimeType_throwsUnknownMimeType(DbType dbType) throws Exception {
+    String rnd = RND.intStr(7);
 
     String actualMimeType[] = new String[]{null};
     String errorMessage = RND.str(10);
@@ -453,7 +511,7 @@ public class FileStorageBuilderDbTest {
         actualMimeType[0] = hereMimeType;
         throw new UnknownMimeType(hereMimeType, errorMessage);
       })
-      .inDb(TestUtil.createFrom(DbType.PostgreSQL, "_fs2"))
+      .inDb(TestUtil.createFrom(dbType, FS2))
       .setDataTable("NoFileContent_data_" + rnd)
       .setParamsTable("NoFileContent_param_" + rnd)
       .build();

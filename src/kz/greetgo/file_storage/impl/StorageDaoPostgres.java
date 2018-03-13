@@ -126,7 +126,7 @@ public class StorageDaoPostgres extends AbstractStorageDao {
     }
   }
 
-  private FileParams readParamsEx(String fileId) throws SQLException {
+  protected FileParams readParamsEx(String fileId) throws SQLException {
     try (Connection connection = builder.dataSource.getConnection()) {
 
       try (PreparedStatement ps = connection.prepareStatement(sql(
@@ -164,7 +164,7 @@ public class StorageDaoPostgres extends AbstractStorageDao {
     }
   }
 
-  private byte[] getDataAsArrayEx(String sha1sum) throws SQLException {
+  protected byte[] getDataAsArrayEx(String sha1sum) throws SQLException {
     try (Connection connection = builder.dataSource.getConnection()) {
 
       try (PreparedStatement ps = connection.prepareStatement(sql(

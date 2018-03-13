@@ -189,6 +189,8 @@ class FileStorageBuilderDbImpl implements FileStorageBuilderDb {
       switch (dbType) {
         case PostgreSQL:
           return new FileStorageBridge(parent, new StorageDaoPostgres(this));
+        case Oracle:
+          return new FileStorageBridge(parent, new StorageDaoOracle(this));
         default:
           throw new RuntimeException("No storage for DB " + dbType);
       }

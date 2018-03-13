@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 public class TestUtil {
   public static DataSource createFrom(DbType dbType, String schemaSuffix) {
     ConnectionManager connectionManager = ConnectionManager.get(dbType);
-    connectionManager.setDbSchema(System.getProperty("user.name") + "_" + schemaSuffix);
+    connectionManager.setDbSchema(schemaSuffix);
 
     return new AbstractDataSource() {
       @Override
