@@ -1,4 +1,4 @@
-package kz.greetgo.file_storage.impl;
+package kz.greetgo.file_storage.impl.util;
 
 import java.math.BigDecimal;
 import java.util.Calendar;

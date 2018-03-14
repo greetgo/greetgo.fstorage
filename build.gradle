@@ -58,10 +58,13 @@ repositories {
 
 dependencies {
 
-  compile 'kz.greetgo:greetgo.util:0.0.6'
+//  testCompile 'kz.greetgo:greetgo.util:0.0.6'
+  testCompile group: 'kz.greetgo.db', name: 'greetgo.db', version: '2.0.0'
+
+
+  testCompile group: 'kz.greetgo.conf', name: 'greetgo.conf', version: '1.0.0'
 
   testCompile group: 'log4j', name: 'log4j', version: '1.2.17'
-
   testCompile group: 'org.postgresql', name: 'postgresql', version: '9.4-1202-jdbc42'
 
   testCompile 'org.testng:testng:6.5.1'
@@ -72,8 +75,6 @@ dependencies {
 
   testCompile "greetgo.3rd-party:oracle-ojdbc6_g:11.2.0.3"
   testCompile "greetgo.3rd-party:oracle-ucp:11.2.0.3"
-
-  testCompile 'kz.greetgo:greetgo.test.db_providers:0.0.6'
 }
 
 test { useTestNG() }

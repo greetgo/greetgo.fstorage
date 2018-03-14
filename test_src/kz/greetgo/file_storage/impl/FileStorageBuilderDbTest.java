@@ -1,5 +1,6 @@
 package kz.greetgo.file_storage.impl;
 
+import kz.greetgo.db.DbType;
 import kz.greetgo.file_storage.FileDataReader;
 import kz.greetgo.file_storage.FileStorage;
 import kz.greetgo.file_storage.errors.FileIdAlreadyExists;
@@ -13,7 +14,8 @@ import kz.greetgo.file_storage.impl.logging.FileStorageLogger;
 import kz.greetgo.file_storage.impl.logging.SqlLogger;
 import kz.greetgo.file_storage.impl.logging.events.FileStorageLoggerErrorEvent;
 import kz.greetgo.file_storage.impl.logging.events.FileStorageLoggerEvent;
-import kz.greetgo.util.db.DbType;
+import kz.greetgo.file_storage.impl.util.RND;
+import kz.greetgo.file_storage.impl.util.TestUtil;
 import org.fest.assertions.api.Assertions;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -29,10 +31,10 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 public class FileStorageBuilderDbTest {
 
-  public static final String FS2 = "fs2_a";
+  public static final String FS2 = "fs2";
 
   private DbType[] dbTypes() {
-    return new DbType[]{DbType.PostgreSQL, DbType.Oracle};
+    return new DbType[]{DbType.Postgres, DbType.Oracle};
   }
 
   @DataProvider

@@ -1,10 +1,9 @@
 package kz.greetgo.file_storage.impl;
 
 import kz.greetgo.file_storage.FileStorage;
-import kz.greetgo.util.db.DbType;
-import kz.greetgo.util.db.DbTypeDetector;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -184,19 +183,23 @@ class FileStorageBuilderDbImpl implements FileStorageBuilderDb {
   @Override
   public FileStorage build() {
     parent.fixed = true;
-    try {
-      DbType dbType = DbTypeDetector.detect(dataSource);
-      switch (dbType) {
-        case PostgreSQL:
-          return new FileStorageBridge(parent, new StorageDaoPostgres(this));
-        case Oracle:
-          return new FileStorageBridge(parent, new StorageDaoOracle(this));
-        default:
-          throw new RuntimeException("No storage for DB " + dbType);
-      }
+
+    try (Connection connection = dataSource.getConnection()) {
+      String db = connection.getMetaData().getDatabaseProductName().toLowerCase();
+      if ("oracle".equals(db)) return buildForOracle();
+      if ("postgresql".equals(db)) return buildForPostgres();
+      throw new RuntimeException("Cannot detect DB type: db = " + db);
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
 
+  }
+
+  private FileStorage buildForOracle() {
+    return new FileStorageBridge(parent, new StorageDaoOracle(this));
+  }
+
+  private FileStorage buildForPostgres() {
+    return new FileStorageBridge(parent, new StorageDaoPostgres(this));
   }
 }
