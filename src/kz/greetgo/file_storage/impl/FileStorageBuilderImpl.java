@@ -1,10 +1,13 @@
 package kz.greetgo.file_storage.impl;
 
+import kz.greetgo.file_storage.errors.MultipleBuilderUsage;
 import kz.greetgo.file_storage.errors.NoFileMimeType;
 import kz.greetgo.file_storage.errors.NoFileName;
+import kz.greetgo.file_storage.errors.StorageTypeAlreadySelected;
 import kz.greetgo.file_storage.errors.UnknownMimeType;
 
 import javax.sql.DataSource;
+import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -17,7 +20,7 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
   boolean fixed = false;
 
   void checkFix() {
-    if (fixed) throw new RuntimeException("You can use builder only ones. Create new builder and build again");
+    if (fixed) throw new MultipleBuilderUsage();
   }
 
   @Override
@@ -65,7 +68,7 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
   Supplier<String> idGenerator = new DefaultIdGenerator();
 
   @Override
-  public FileStorageBuilder idGenerator(int idLength, Supplier<String> idGenerator) {
+  public FileStorageBuilder setIdGenerator(int idLength, Supplier<String> idGenerator) {
     if (idLength < 7) throw new IllegalArgumentException("Must be idLength >= 7: idLength = " + idLength);
     if (idGenerator == null) throw new NullPointerException("idGenerator == null");
     fileIdLength = idLength;
@@ -97,8 +100,23 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
     throw new UnknownMimeType(mimeType);
   }
 
+  boolean storageTypeSelected = false;
+
   @Override
   public FileStorageBuilderDb inDb(DataSource dataSource) {
+    checkStorageTypeSelected();
+    storageTypeSelected = true;
     return new FileStorageBuilderDbImpl(this, dataSource);
+  }
+
+  private void checkStorageTypeSelected() {
+    if (storageTypeSelected) throw new StorageTypeAlreadySelected();
+  }
+
+  @Override
+  public FileStorageBuilderMultiDb inMultiDb(List<DataSource> dataSourceList) {
+    checkStorageTypeSelected();
+    storageTypeSelected = true;
+    return new FileStorageBuilderMultiDbImpl(this, dataSourceList);
   }
 }

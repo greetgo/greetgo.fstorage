@@ -29,23 +29,9 @@ import java.util.List;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
-public class FileStorageBuilderDbTest {
+public class FileStorageBuilderDbTest extends DataProvidersForTests {
 
-  public static final String FS2 = "fs2";
-
-  private DbType[] dbTypes() {
-    return new DbType[]{DbType.Postgres, DbType.Oracle};
-  }
-
-  @DataProvider
-  public Object[][] dbTypeDataProvider() {
-    DbType[] dbTypes = dbTypes();
-    Object[][] ret = new Object[dbTypes.length][];
-    for (int i = 0; i < dbTypes.length; i++) {
-      ret[i] = new Object[]{dbTypes[i]};
-    }
-    return ret;
-  }
+  public static final String SCHEMA = "fs2";
 
   @BeforeMethod
   public void setNewSqlLogger_to_FileStorageLogger() throws Exception {
@@ -74,7 +60,7 @@ public class FileStorageBuilderDbTest {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(dbType, FS2))
+      .inDb(TestUtil.createFrom(dbType, SCHEMA))
       .build();
 
     String data = "Содержимое " + RND.str(400);
@@ -128,7 +114,7 @@ public class FileStorageBuilderDbTest {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(dbType, FS2))
+      .inDb(TestUtil.createFrom(dbType, SCHEMA))
       .build();
 
     //
@@ -144,7 +130,7 @@ public class FileStorageBuilderDbTest {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(dbType, FS2))
+      .inDb(TestUtil.createFrom(dbType, SCHEMA))
       .build();
 
     //
@@ -160,7 +146,7 @@ public class FileStorageBuilderDbTest {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(dbType, FS2))
+      .inDb(TestUtil.createFrom(dbType, SCHEMA))
       .build();
 
     //
@@ -178,8 +164,8 @@ public class FileStorageBuilderDbTest {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
-      .idGenerator(20, () -> prefix + RND.str(10))
-      .inDb(TestUtil.createFrom(dbType, FS2))
+      .setIdGenerator(20, () -> prefix + RND.str(10))
+      .inDb(TestUtil.createFrom(dbType, SCHEMA))
       .build();
 
     //
@@ -204,8 +190,8 @@ public class FileStorageBuilderDbTest {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
-      .idGenerator(200, () -> prefix + RND.str(100))
-      .inDb(TestUtil.createFrom(dbType, FS2))
+      .setIdGenerator(200, () -> prefix + RND.str(100))
+      .inDb(TestUtil.createFrom(dbType, SCHEMA))
       .setDataTable("idLen200_data")
       .setDataTableId("file_id")
       .setDataTableData("file_data")
@@ -241,7 +227,7 @@ public class FileStorageBuilderDbTest {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(dbType, FS2))
+      .inDb(TestUtil.createFrom(dbType, SCHEMA))
       .build();
 
     String data = "Содержимое " + RND.str(400);
@@ -275,7 +261,7 @@ public class FileStorageBuilderDbTest {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(dbType, FS2))
+      .inDb(TestUtil.createFrom(dbType, SCHEMA))
       .build();
 
     String fileId = storage.storing()
@@ -306,7 +292,7 @@ public class FileStorageBuilderDbTest {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(dbType, FS2))
+      .inDb(TestUtil.createFrom(dbType, SCHEMA))
       .setDataTable("usingMimeType_data_" + rnd)
       .setParamsTable("usingMimeType_param_" + rnd)
       .setParamsTableMimeType("asd_mime_type_" + rnd)
@@ -350,7 +336,7 @@ public class FileStorageBuilderDbTest {
     FileStorage storage = FileStorageBuilder
       .newBuilder()
       .mandatoryMimeType(true)
-      .inDb(TestUtil.createFrom(dbType, FS2))
+      .inDb(TestUtil.createFrom(dbType, SCHEMA))
       .setDataTable("NoFileMimeType_data_" + rnd)
       .setParamsTable("NoFileMimeType_param_" + rnd)
       .setParamsTableMimeType("asd_mime_type_" + rnd)
@@ -373,7 +359,7 @@ public class FileStorageBuilderDbTest {
     FileStorage storage = FileStorageBuilder
       .newBuilder()
       .mandatoryName(true)
-      .inDb(TestUtil.createFrom(dbType, FS2))
+      .inDb(TestUtil.createFrom(dbType, SCHEMA))
       .setDataTable("NoFileName_data_" + rnd)
       .setParamsTable("NoFileName_param_" + rnd)
       .build();
@@ -394,7 +380,7 @@ public class FileStorageBuilderDbTest {
 
     FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(DbType.Oracle, FS2))
+      .inDb(TestUtil.createFrom(DbType.Oracle, SCHEMA))
       .setDataTable("name_is_very_very_very_long_" + rnd)
       .build();
   }
@@ -405,7 +391,7 @@ public class FileStorageBuilderDbTest {
 
     FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(DbType.Oracle, FS2))
+      .inDb(TestUtil.createFrom(DbType.Oracle, SCHEMA))
       .setParamsTableMimeType("name_is_very_very_very_long_" + rnd)
       .build();
   }
@@ -416,7 +402,7 @@ public class FileStorageBuilderDbTest {
 
     FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(DbType.Oracle, FS2))
+      .inDb(TestUtil.createFrom(DbType.Oracle, SCHEMA))
       .setParamsTable("name_is_very_very_very_long_" + rnd)
       .build();
   }
@@ -427,7 +413,7 @@ public class FileStorageBuilderDbTest {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(dbType, FS2))
+      .inDb(TestUtil.createFrom(dbType, SCHEMA))
       .setDataTable("NoFileContent_data_" + rnd)
       .setParamsTable("NoFileContent_param_" + rnd)
       .build();
@@ -452,7 +438,7 @@ public class FileStorageBuilderDbTest {
         actualMimeType[0] = hereMimeType;
         return false;
       })
-      .inDb(TestUtil.createFrom(dbType, FS2))
+      .inDb(TestUtil.createFrom(dbType, SCHEMA))
       .setDataTable("NoFileContent_data_" + rnd)
       .setParamsTable("NoFileContent_param_" + rnd)
       .build();
@@ -490,7 +476,7 @@ public class FileStorageBuilderDbTest {
         actualMimeType[0] = hereMimeType;
         throw new RuntimeException(errorMessage);
       })
-      .inDb(TestUtil.createFrom(dbType, FS2))
+      .inDb(TestUtil.createFrom(dbType, SCHEMA))
       .setDataTable("NoFileContent_data_" + rnd)
       .setParamsTable("NoFileContent_param_" + rnd)
       .build();
@@ -529,7 +515,7 @@ public class FileStorageBuilderDbTest {
         actualMimeType[0] = hereMimeType;
         throw new UnknownMimeType(hereMimeType, errorMessage);
       })
-      .inDb(TestUtil.createFrom(dbType, FS2))
+      .inDb(TestUtil.createFrom(dbType, SCHEMA))
       .setDataTable("NoFileContent_data_" + rnd)
       .setParamsTable("NoFileContent_param_" + rnd)
       .build();
@@ -559,7 +545,7 @@ public class FileStorageBuilderDbTest {
   public void checkDefaultValue_dataTable(DbType dbType) throws Exception {
     FileStorageBuilderDb builder = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(dbType, FS2));
+      .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
     assertThat(builder.getDataTable()).isEqualTo("file_storage_data");
   }
@@ -568,7 +554,7 @@ public class FileStorageBuilderDbTest {
   public void checkDefaultValue_dataTableId(DbType dbType) throws Exception {
     FileStorageBuilderDb builder = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(dbType, FS2));
+      .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
     assertThat(builder.getDataTableId()).isEqualTo("sha1sum");
   }
@@ -577,7 +563,7 @@ public class FileStorageBuilderDbTest {
   public void checkDefaultValue_dataTableData(DbType dbType) throws Exception {
     FileStorageBuilderDb builder = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(dbType, FS2));
+      .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
     assertThat(builder.getDataTableData()).isEqualTo("data");
   }
@@ -586,7 +572,7 @@ public class FileStorageBuilderDbTest {
   public void checkDefaultValue_paramsTable(DbType dbType) throws Exception {
     FileStorageBuilderDb builder = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(dbType, FS2));
+      .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
     assertThat(builder.getParamsTable()).isEqualTo("file_storage_params");
   }
@@ -595,7 +581,7 @@ public class FileStorageBuilderDbTest {
   public void checkDefaultValue_paramsTableId(DbType dbType) throws Exception {
     FileStorageBuilderDb builder = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(dbType, FS2));
+      .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
     assertThat(builder.getParamsTableId()).isEqualTo("id");
   }
@@ -604,7 +590,7 @@ public class FileStorageBuilderDbTest {
   public void checkDefaultValue_paramsTableDataId(DbType dbType) throws Exception {
     FileStorageBuilderDb builder = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(dbType, FS2));
+      .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
     assertThat(builder.getParamsTableDataId()).isEqualTo("sha1sum");
   }
@@ -613,7 +599,7 @@ public class FileStorageBuilderDbTest {
   public void checkDefaultValue_paramsTableLastModifiedAt(DbType dbType) throws Exception {
     FileStorageBuilderDb builder = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(dbType, FS2));
+      .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
     assertThat(builder.getParamsTableLastModifiedAt()).isEqualTo("lastModifiedAt");
   }
@@ -622,7 +608,7 @@ public class FileStorageBuilderDbTest {
   public void checkDefaultValue_paramsTableMimeType(DbType dbType) throws Exception {
     FileStorageBuilderDb builder = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(dbType, FS2));
+      .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
     assertThat(builder.getParamsTableMimeType()).isEqualTo("mimeType");
   }
@@ -631,7 +617,7 @@ public class FileStorageBuilderDbTest {
   public void checkDefaultValue_paramsTableMimeTypeLength(DbType dbType) throws Exception {
     FileStorageBuilderDb builder = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(dbType, FS2));
+      .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
     assertThat(builder.getParamsTableMimeTypeLength()).isEqualTo(50);
   }
@@ -640,7 +626,7 @@ public class FileStorageBuilderDbTest {
   public void checkDefaultValue_paramsTableName(DbType dbType) throws Exception {
     FileStorageBuilderDb builder = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(dbType, FS2));
+      .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
     assertThat(builder.getParamsTableName()).isEqualTo("name");
   }
@@ -649,7 +635,7 @@ public class FileStorageBuilderDbTest {
   public void checkDefaultValue_paramsTableNameLength(DbType dbType) throws Exception {
     FileStorageBuilderDb builder = FileStorageBuilder
       .newBuilder()
-      .inDb(TestUtil.createFrom(dbType, FS2));
+      .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
     assertThat(builder.getParamsTableNameLength()).isEqualTo(300);
   }

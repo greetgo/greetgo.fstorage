@@ -1,8 +1,7 @@
 package kz.greetgo.file_storage.impl;
 
-import kz.greetgo.file_storage.FileStorage;
-
 import javax.sql.DataSource;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -24,7 +23,7 @@ public interface FileStorageBuilder {
    * Указывает
    *
    * @param mandatoryName необходимость обязательного определения имени файла
-   * @return ссылка на этого строителя для возможности точечной нотации
+   * @return ссылка на строителя для продолжения создания хранилища файлов
    */
   FileStorageBuilder mandatoryName(boolean mandatoryName);
 
@@ -32,7 +31,7 @@ public interface FileStorageBuilder {
    * Указывает
    *
    * @param mandatoryMimeType необходимость обязательного определения MIME-типа файла
-   * @return ссылка на этого строителя для возможности точечной нотации
+   * @return ссылка на строителя для продолжения создания хранилища файлов
    */
   FileStorageBuilder mandatoryMimeType(boolean mandatoryMimeType);
 
@@ -40,7 +39,7 @@ public interface FileStorageBuilder {
    * Устанавливает
    *
    * @param validator проверщик корректности mimeType
-   * @return ссылка на этого строителя для возможности точечной нотации
+   * @return ссылка на строителя для продолжения создания хранилища файлов
    */
   FileStorageBuilder mimeTypeValidator(Function<String, Boolean> validator);
 
@@ -49,15 +48,24 @@ public interface FileStorageBuilder {
    *
    * @param idGenerator другой генератор иднетификаторов
    * @param idLength    максимальная длинна в символах, генерируемых идентификаторов
-   * @return ссылка на этого строителя для возможности точечной нотации
+   * @return ссылка на строителя для продолжения создания хранилища файлов
    */
-  FileStorageBuilder idGenerator(int idLength, Supplier<String> idGenerator);
+  FileStorageBuilder setIdGenerator(int idLength, Supplier<String> idGenerator);
 
   /**
-   * Указывает
+   * Указывает хранение файлов в одной реляционной БД
    *
-   * @param dataSource источник донектов к БД, чтобы создать хнанителя файлов в БД
-   * @return ссылка на этого строителя для возможности точечной нотации
+   * @param dataSource источник конектов к БД, чтобы создать хнанителя файлов в БД
+   * @return ссылка на строителя для продолжения создания хранилища файлов
    */
   FileStorageBuilderDb inDb(DataSource dataSource);
+
+  /**
+   * Указывает хранение файлов в нескольких реляционных БД
+   *
+   * @param dataSourceList список источников коннектов к релационным БД. Порядок в списке очень важет, так как данные
+   *                       шардируются
+   * @return ссылка на строителя для продолжения создания хранилища файлов
+   */
+  FileStorageBuilderMultiDb inMultiDb(List<DataSource> dataSourceList);
 }

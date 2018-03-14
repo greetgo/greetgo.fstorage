@@ -41,16 +41,16 @@ public class ConnectionManagerOracle extends ConnectionManager {
   private void prepareDbSchemaException() throws Exception {
     Class.forName("oracle.jdbc.driver.OracleDriver");
 
-    try (Connection con = DriverManager.getConnection(
+    try (Connection connection = DriverManager.getConnection(
       url(), SysParams.oracleAdminUserid(), SysParams.oracleAdminPassword()
     )) {
 
       try {
-        query(con, "alter session set \"_oracle_script\"=true");
+        query(connection, "alter session set \"_oracle_script\"=true");
       } catch (SQLSyntaxErrorException ignore) {}
 
-      query(con, "create user " + mySchema() + " identified by " + mySchema());
-      query(con, "grant all privileges to " + mySchema());
+      query(connection, "create user " + mySchema() + " identified by " + mySchema());
+      query(connection, "grant all privileges to " + mySchema());
     }
   }
 }
