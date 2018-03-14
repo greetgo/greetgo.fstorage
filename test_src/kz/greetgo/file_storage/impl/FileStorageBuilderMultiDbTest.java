@@ -11,6 +11,7 @@ import javax.sql.DataSource;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -100,7 +101,7 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
       .inMultiDb(dataSourceList)
       .setTableIndexLength(7)
       .setTableCountPerDb(5)
-      .setTableName("tn_" + RND.intStr(10))
+      .setTableName("tn1_" + RND.intStr(10))
       .setTableSelector(fileId -> {
         String[] split = fileId.split("-");
         return new TablePosition(Integer.parseInt(split[0]), Integer.parseInt(split[1]));
@@ -136,4 +137,70 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
 
     }
   }
+
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void store_read_parallelCreation_manyRecords(DbType dbType) throws Exception {
+    List<DataSource> dataSourceList = dataSourceList(dbType, 3);
+
+    FileStorage fileStorage = FileStorageBuilder
+      .newBuilder()
+      .inMultiDb(dataSourceList)
+      .setTableName("tn2_" + RND.intStr(10))
+      .build();
+
+    class Dot {
+      final String name;
+      final String content;
+
+      String fileId;
+
+      public Dot(String name, String content) {
+        this.name = name;
+        this.content = content;
+      }
+    }
+
+    List<Dot> list = new ArrayList<>();
+    for (int i = 0; i < 10_000; i++) {
+      list.add(new Dot("Файл" + i, "Содержание " + RND.str(500)));
+    }
+
+    {
+      ArrayBlockingQueue<Dot> queue = new ArrayBlockingQueue<>(5000, false);
+      queue.addAll(list);
+
+      List<Thread> threadList = new ArrayList<>();
+      for (int i = 0; i < 13; i++) {
+        threadList.add(new Thread(() -> {
+
+          while (true) {
+            Dot dot = queue.poll();
+            if (dot == null) return;
+            dot.fileId = fileStorage.storing()
+              .name(dot.name)
+              .data(dot.content.getBytes(StandardCharsets.UTF_8))
+              .store();
+          }
+
+        }));
+      }
+
+      threadList.forEach(Thread::start);
+      for (Thread thread1 : threadList) {
+        thread1.join();
+      }
+    }
+
+    for (Dot dot : list) {
+
+      FileDataReader reader = fileStorage.read(dot.fileId);
+
+      assertThat(reader.id()).isEqualTo(dot.fileId);
+      assertThat(new String(reader.dataAsArray(), StandardCharsets.UTF_8)).isEqualTo(dot.content);
+      assertThat(reader.name()).isEqualTo(dot.name);
+
+    }
+
+  }
+
 }
