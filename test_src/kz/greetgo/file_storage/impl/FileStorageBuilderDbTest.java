@@ -207,7 +207,17 @@ public class FileStorageBuilderDbTest {
       .idGenerator(200, () -> prefix + RND.str(100))
       .inDb(TestUtil.createFrom(dbType, FS2))
       .setDataTable("idLen200_data")
+      .setDataTableId("file_id")
+      .setDataTableData("file_data")
       .setParamsTable("idLen200_param")
+      .setParamsTableId("param_id")
+      .setParamsTableName("param_name")
+      .setParamsTableNameLength(250)
+      .setParamsTableDataId("param_data_id")
+      .setParamsTableMimeType("param_mt")
+      .setParamsTableMimeTypeLength(450)
+      .setParamsTableLastModifiedAt("updatedAt")
+
       .build();
 
     //
@@ -543,5 +553,104 @@ public class FileStorageBuilderDbTest {
     }
 
     assertThat(actualMimeType[0]).isEqualTo(mimeType);
+  }
+
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void checkDefaultValue_dataTable(DbType dbType) throws Exception {
+    FileStorageBuilderDb builder = FileStorageBuilder
+      .newBuilder()
+      .inDb(TestUtil.createFrom(dbType, FS2));
+
+    assertThat(builder.getDataTable()).isEqualTo("file_storage_data");
+  }
+
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void checkDefaultValue_dataTableId(DbType dbType) throws Exception {
+    FileStorageBuilderDb builder = FileStorageBuilder
+      .newBuilder()
+      .inDb(TestUtil.createFrom(dbType, FS2));
+
+    assertThat(builder.getDataTableId()).isEqualTo("sha1sum");
+  }
+
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void checkDefaultValue_dataTableData(DbType dbType) throws Exception {
+    FileStorageBuilderDb builder = FileStorageBuilder
+      .newBuilder()
+      .inDb(TestUtil.createFrom(dbType, FS2));
+
+    assertThat(builder.getDataTableData()).isEqualTo("data");
+  }
+
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void checkDefaultValue_paramsTable(DbType dbType) throws Exception {
+    FileStorageBuilderDb builder = FileStorageBuilder
+      .newBuilder()
+      .inDb(TestUtil.createFrom(dbType, FS2));
+
+    assertThat(builder.getParamsTable()).isEqualTo("file_storage_params");
+  }
+
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void checkDefaultValue_paramsTableId(DbType dbType) throws Exception {
+    FileStorageBuilderDb builder = FileStorageBuilder
+      .newBuilder()
+      .inDb(TestUtil.createFrom(dbType, FS2));
+
+    assertThat(builder.getParamsTableId()).isEqualTo("id");
+  }
+
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void checkDefaultValue_paramsTableDataId(DbType dbType) throws Exception {
+    FileStorageBuilderDb builder = FileStorageBuilder
+      .newBuilder()
+      .inDb(TestUtil.createFrom(dbType, FS2));
+
+    assertThat(builder.getParamsTableDataId()).isEqualTo("sha1sum");
+  }
+
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void checkDefaultValue_paramsTableLastModifiedAt(DbType dbType) throws Exception {
+    FileStorageBuilderDb builder = FileStorageBuilder
+      .newBuilder()
+      .inDb(TestUtil.createFrom(dbType, FS2));
+
+    assertThat(builder.getParamsTableLastModifiedAt()).isEqualTo("lastModifiedAt");
+  }
+
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void checkDefaultValue_paramsTableMimeType(DbType dbType) throws Exception {
+    FileStorageBuilderDb builder = FileStorageBuilder
+      .newBuilder()
+      .inDb(TestUtil.createFrom(dbType, FS2));
+
+    assertThat(builder.getParamsTableMimeType()).isEqualTo("mimeType");
+  }
+
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void checkDefaultValue_paramsTableMimeTypeLength(DbType dbType) throws Exception {
+    FileStorageBuilderDb builder = FileStorageBuilder
+      .newBuilder()
+      .inDb(TestUtil.createFrom(dbType, FS2));
+
+    assertThat(builder.getParamsTableMimeTypeLength()).isEqualTo(50);
+  }
+
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void checkDefaultValue_paramsTableName(DbType dbType) throws Exception {
+    FileStorageBuilderDb builder = FileStorageBuilder
+      .newBuilder()
+      .inDb(TestUtil.createFrom(dbType, FS2));
+
+    assertThat(builder.getParamsTableName()).isEqualTo("name");
+  }
+
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void checkDefaultValue_paramsTableNameLength(DbType dbType) throws Exception {
+    FileStorageBuilderDb builder = FileStorageBuilder
+      .newBuilder()
+      .inDb(TestUtil.createFrom(dbType, FS2));
+
+    assertThat(builder.getParamsTableNameLength()).isEqualTo(300);
   }
 }

@@ -5,8 +5,6 @@ import kz.greetgo.file_storage.FileStorage;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 class FileStorageBuilderDbImpl implements FileStorageBuilderDb {
   final FileStorageBuilderImpl parent;
@@ -129,11 +127,6 @@ class FileStorageBuilderDbImpl implements FileStorageBuilderDb {
     return paramsTableMimeTypeLength;
   }
 
-  @Override
-  public FileStorageBuilderDb mimeTypeValidator(Function<String, Boolean> validator) {
-    parent.mimeTypeValidator(validator);
-    return this;
-  }
 
   @Override
   public String getParamsTableDataId() {
@@ -157,28 +150,6 @@ class FileStorageBuilderDbImpl implements FileStorageBuilderDb {
     return this;
   }
 
-  @Override
-  public FileStorageBuilderDb mandatoryName(boolean mandatoryName) {
-    parent.mandatoryName(mandatoryName);
-    return this;
-  }
-
-  @Override
-  public FileStorageBuilderDb mandatoryMimeType(boolean mandatoryMimeType) {
-    parent.mandatoryMimeType(mandatoryMimeType);
-    return this;
-  }
-
-  @Override
-  public FileStorageBuilderDb idGenerator(int idLength, Supplier<String> idGenerator) {
-    parent.idGenerator(idLength, idGenerator);
-    return this;
-  }
-
-  @Override
-  public FileStorageBuilderDb inDb(DataSource dataSource) {
-    throw new IllegalStateException("Storage type, you already has been defined");//Yoda style!
-  }
 
   @Override
   public FileStorage build() {

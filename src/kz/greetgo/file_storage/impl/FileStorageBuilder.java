@@ -60,11 +60,4 @@ public interface FileStorageBuilder {
    * @return ссылка на этого строителя для возможности точечной нотации
    */
   FileStorageBuilderDb inDb(DataSource dataSource);
-
-  /**
-   * Неосредственно создаёт
-   *
-   * @return хранителя файлов, параметры которого указаны ранее
-   */
-  FileStorage build();
 }

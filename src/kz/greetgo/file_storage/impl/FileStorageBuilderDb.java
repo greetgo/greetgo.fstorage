@@ -1,9 +1,11 @@
 package kz.greetgo.file_storage.impl;
 
+import kz.greetgo.file_storage.FileStorage;
+
 /**
  * Строитель хранилища файлов в БД
  */
-public interface FileStorageBuilderDb extends FileStorageBuilder {
+public interface FileStorageBuilderDb {
 
   String getDataTable();
 
@@ -49,4 +51,6 @@ public interface FileStorageBuilderDb extends FileStorageBuilder {
   FileStorageBuilderDb setParamsTableMimeTypeLength(int paramsTableMimeTypeLength);
 
   int getParamsTableMimeTypeLength();
+
+  FileStorage build();
 }

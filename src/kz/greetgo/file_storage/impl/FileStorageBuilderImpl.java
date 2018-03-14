@@ -1,6 +1,5 @@
 package kz.greetgo.file_storage.impl;
 
-import kz.greetgo.file_storage.FileStorage;
 import kz.greetgo.file_storage.errors.NoFileMimeType;
 import kz.greetgo.file_storage.errors.NoFileName;
 import kz.greetgo.file_storage.errors.UnknownMimeType;
@@ -101,10 +100,5 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
   @Override
   public FileStorageBuilderDb inDb(DataSource dataSource) {
     return new FileStorageBuilderDbImpl(this, dataSource);
-  }
-
-  @Override
-  public FileStorage build() {
-    throw new RuntimeException("Cannot create file storage from " + getClass());
   }
 }
