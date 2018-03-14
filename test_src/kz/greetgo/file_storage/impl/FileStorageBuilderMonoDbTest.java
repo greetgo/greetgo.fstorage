@@ -24,7 +24,7 @@ import java.util.List;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
-public class FileStorageBuilderDbTest extends DataProvidersForTests {
+public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
 
   public static final String SCHEMA = "fs2";
 
@@ -516,7 +516,7 @@ public class FileStorageBuilderDbTest extends DataProvidersForTests {
 
   @Test(dataProvider = "dbTypeDataProvider")
   public void checkDefaultValue_dataTable(DbType dbType) throws Exception {
-    FileStorageBuilderDb builder = FileStorageBuilder
+    FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
@@ -525,7 +525,7 @@ public class FileStorageBuilderDbTest extends DataProvidersForTests {
 
   @Test(dataProvider = "dbTypeDataProvider")
   public void checkDefaultValue_dataTableId(DbType dbType) throws Exception {
-    FileStorageBuilderDb builder = FileStorageBuilder
+    FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
@@ -534,7 +534,7 @@ public class FileStorageBuilderDbTest extends DataProvidersForTests {
 
   @Test(dataProvider = "dbTypeDataProvider")
   public void checkDefaultValue_dataTableData(DbType dbType) throws Exception {
-    FileStorageBuilderDb builder = FileStorageBuilder
+    FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
@@ -543,7 +543,7 @@ public class FileStorageBuilderDbTest extends DataProvidersForTests {
 
   @Test(dataProvider = "dbTypeDataProvider")
   public void checkDefaultValue_paramsTable(DbType dbType) throws Exception {
-    FileStorageBuilderDb builder = FileStorageBuilder
+    FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
@@ -552,7 +552,7 @@ public class FileStorageBuilderDbTest extends DataProvidersForTests {
 
   @Test(dataProvider = "dbTypeDataProvider")
   public void checkDefaultValue_paramsTableId(DbType dbType) throws Exception {
-    FileStorageBuilderDb builder = FileStorageBuilder
+    FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
@@ -561,7 +561,7 @@ public class FileStorageBuilderDbTest extends DataProvidersForTests {
 
   @Test(dataProvider = "dbTypeDataProvider")
   public void checkDefaultValue_paramsTableDataId(DbType dbType) throws Exception {
-    FileStorageBuilderDb builder = FileStorageBuilder
+    FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
@@ -570,7 +570,7 @@ public class FileStorageBuilderDbTest extends DataProvidersForTests {
 
   @Test(dataProvider = "dbTypeDataProvider")
   public void checkDefaultValue_paramsTableLastModifiedAt(DbType dbType) throws Exception {
-    FileStorageBuilderDb builder = FileStorageBuilder
+    FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
@@ -579,7 +579,7 @@ public class FileStorageBuilderDbTest extends DataProvidersForTests {
 
   @Test(dataProvider = "dbTypeDataProvider")
   public void checkDefaultValue_paramsTableMimeType(DbType dbType) throws Exception {
-    FileStorageBuilderDb builder = FileStorageBuilder
+    FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
@@ -588,7 +588,7 @@ public class FileStorageBuilderDbTest extends DataProvidersForTests {
 
   @Test(dataProvider = "dbTypeDataProvider")
   public void checkDefaultValue_paramsTableMimeTypeLength(DbType dbType) throws Exception {
-    FileStorageBuilderDb builder = FileStorageBuilder
+    FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
@@ -597,7 +597,7 @@ public class FileStorageBuilderDbTest extends DataProvidersForTests {
 
   @Test(dataProvider = "dbTypeDataProvider")
   public void checkDefaultValue_paramsTableName(DbType dbType) throws Exception {
-    FileStorageBuilderDb builder = FileStorageBuilder
+    FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
@@ -606,7 +606,7 @@ public class FileStorageBuilderDbTest extends DataProvidersForTests {
 
   @Test(dataProvider = "dbTypeDataProvider")
   public void checkDefaultValue_paramsTableNameLength(DbType dbType) throws Exception {
-    FileStorageBuilderDb builder = FileStorageBuilder
+    FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
 

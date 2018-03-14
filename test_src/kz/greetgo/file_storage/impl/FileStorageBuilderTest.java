@@ -5,7 +5,6 @@ import kz.greetgo.file_storage.FileDataReader;
 import kz.greetgo.file_storage.FileStorage;
 import kz.greetgo.file_storage.errors.NoFileName;
 import kz.greetgo.file_storage.errors.StorageTypeAlreadySelected;
-import kz.greetgo.file_storage.impl.util.FileStorageCreator;
 import kz.greetgo.file_storage.impl.util.RND;
 import org.testng.annotations.Test;
 

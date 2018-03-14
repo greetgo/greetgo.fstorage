@@ -3,10 +3,8 @@ package kz.greetgo.file_storage.impl;
 import kz.greetgo.file_storage.FileStorage;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 
-class FileStorageBuilderDbImpl implements FileStorageBuilderDb {
+class FileStorageBuilderMonoDbImpl implements FileStorageBuilderMonoDb {
   final FileStorageBuilderImpl parent;
   final DataSource dataSource;
   String dataTable = "file_storage_data";
@@ -21,7 +19,7 @@ class FileStorageBuilderDbImpl implements FileStorageBuilderDb {
   String paramsTableMimeType = "mimeType";
   int paramsTableMimeTypeLength = 50;
 
-  public FileStorageBuilderDbImpl(FileStorageBuilderImpl parent, DataSource dataSource) {
+  public FileStorageBuilderMonoDbImpl(FileStorageBuilderImpl parent, DataSource dataSource) {
     this.parent = parent;
     this.dataSource = dataSource;
   }
@@ -32,7 +30,7 @@ class FileStorageBuilderDbImpl implements FileStorageBuilderDb {
   }
 
   @Override
-  public FileStorageBuilderDb setDataTable(String dataTable) {
+  public FileStorageBuilderMonoDb setDataTable(String dataTable) {
     this.dataTable = dataTable;
     return this;
   }
@@ -43,7 +41,7 @@ class FileStorageBuilderDbImpl implements FileStorageBuilderDb {
   }
 
   @Override
-  public FileStorageBuilderDb setDataTableId(String dataTableId) {
+  public FileStorageBuilderMonoDb setDataTableId(String dataTableId) {
     this.dataTableId = dataTableId;
     return this;
   }
@@ -54,7 +52,7 @@ class FileStorageBuilderDbImpl implements FileStorageBuilderDb {
   }
 
   @Override
-  public FileStorageBuilderDb setDataTableData(String dataTableData) {
+  public FileStorageBuilderMonoDb setDataTableData(String dataTableData) {
     this.dataTableData = dataTableData;
     return this;
   }
@@ -65,7 +63,7 @@ class FileStorageBuilderDbImpl implements FileStorageBuilderDb {
   }
 
   @Override
-  public FileStorageBuilderDb setParamsTable(String paramsTable) {
+  public FileStorageBuilderMonoDb setParamsTable(String paramsTable) {
     this.paramsTable = paramsTable;
     return this;
   }
@@ -76,7 +74,7 @@ class FileStorageBuilderDbImpl implements FileStorageBuilderDb {
   }
 
   @Override
-  public FileStorageBuilderDb setParamsTableId(String paramsTableId) {
+  public FileStorageBuilderMonoDb setParamsTableId(String paramsTableId) {
     this.paramsTableId = paramsTableId;
     return this;
   }
@@ -88,7 +86,7 @@ class FileStorageBuilderDbImpl implements FileStorageBuilderDb {
 
 
   @Override
-  public FileStorageBuilderDb setParamsTableName(String paramsTableName) {
+  public FileStorageBuilderMonoDb setParamsTableName(String paramsTableName) {
     this.paramsTableName = paramsTableName;
     return this;
   }
@@ -100,7 +98,7 @@ class FileStorageBuilderDbImpl implements FileStorageBuilderDb {
 
 
   @Override
-  public FileStorageBuilderDb setParamsTableNameLength(int paramsTableNameLength) {
+  public FileStorageBuilderMonoDb setParamsTableNameLength(int paramsTableNameLength) {
     this.paramsTableNameLength = paramsTableNameLength;
     return this;
   }
@@ -111,13 +109,13 @@ class FileStorageBuilderDbImpl implements FileStorageBuilderDb {
   }
 
   @Override
-  public FileStorageBuilderDb setParamsTableMimeType(String paramsTableMimeType) {
+  public FileStorageBuilderMonoDb setParamsTableMimeType(String paramsTableMimeType) {
     this.paramsTableMimeType = paramsTableMimeType;
     return this;
   }
 
   @Override
-  public FileStorageBuilderDb setParamsTableMimeTypeLength(int paramsTableMimeTypeLength) {
+  public FileStorageBuilderMonoDb setParamsTableMimeTypeLength(int paramsTableMimeTypeLength) {
     this.paramsTableMimeTypeLength = paramsTableMimeTypeLength;
     return this;
   }
@@ -134,7 +132,7 @@ class FileStorageBuilderDbImpl implements FileStorageBuilderDb {
   }
 
   @Override
-  public FileStorageBuilderDb setParamsTableDataId(String paramsTableDataId) {
+  public FileStorageBuilderMonoDb setParamsTableDataId(String paramsTableDataId) {
     this.paramsTableDataId = paramsTableDataId;
     return this;
   }
@@ -145,7 +143,7 @@ class FileStorageBuilderDbImpl implements FileStorageBuilderDb {
   }
 
   @Override
-  public FileStorageBuilderDb setParamsTableLastModifiedAt(String paramsTableLastModifiedAt) {
+  public FileStorageBuilderMonoDb setParamsTableLastModifiedAt(String paramsTableLastModifiedAt) {
     this.paramsTableLastModifiedAt = paramsTableLastModifiedAt;
     return this;
   }
@@ -154,23 +152,11 @@ class FileStorageBuilderDbImpl implements FileStorageBuilderDb {
   @Override
   public FileStorage build() {
     parent.fixed = true;
-
-    try (Connection connection = dataSource.getConnection()) {
-      String db = connection.getMetaData().getDatabaseProductName().toLowerCase();
-      if ("oracle".equals(db)) return buildForOracle();
-      if ("postgresql".equals(db)) return buildForPostgres();
-      throw new RuntimeException("Cannot detect DB type: db = " + db);
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
-
+    return FileStorageCreator.selectDb(
+      dataSource,
+      () -> new FileStorageMonoDbLogic(parent, new StorageMonoDbDaoPostgres(this)),
+      () -> new FileStorageMonoDbLogic(parent, new StorageMonoDbDaoOracle(this))
+    );
   }
 
-  private FileStorage buildForOracle() {
-    return new FileStorageBridge(parent, new StorageDaoOracle(this));
-  }
-
-  private FileStorage buildForPostgres() {
-    return new FileStorageBridge(parent, new StorageDaoPostgres(this));
-  }
 }

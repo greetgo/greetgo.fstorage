@@ -6,8 +6,8 @@ import javax.sql.DataSource;
 import java.util.List;
 
 public class FileStorageBuilderMultiDbImpl implements FileStorageBuilderMultiDb {
-  private final FileStorageBuilderImpl parent;
-  private final List<DataSource> dataSourceList;
+  final FileStorageBuilderImpl parent;
+  final List<DataSource> dataSourceList;
 
   public FileStorageBuilderMultiDbImpl(FileStorageBuilderImpl parent, List<DataSource> dataSourceList) {
     this.parent = parent;

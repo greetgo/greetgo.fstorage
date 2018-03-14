@@ -7,8 +7,8 @@ import kz.greetgo.file_storage.impl.jdbc.Query;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class StorageDaoPostgres extends AbstractStorageDao {
-  StorageDaoPostgres(FileStorageBuilderDbImpl builder) {
+public class StorageMonoDbDaoPostgres extends AbstractStorageMonoDbDao {
+  StorageMonoDbDaoPostgres(FileStorageBuilderMonoDbImpl builder) {
     super(builder);
   }
 

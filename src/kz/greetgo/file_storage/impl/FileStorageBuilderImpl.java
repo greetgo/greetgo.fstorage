@@ -103,10 +103,10 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
   boolean storageTypeSelected = false;
 
   @Override
-  public FileStorageBuilderDb inDb(DataSource dataSource) {
+  public FileStorageBuilderMonoDb inDb(DataSource dataSource) {
     checkStorageTypeSelected();
     storageTypeSelected = true;
-    return new FileStorageBuilderDbImpl(this, dataSource);
+    return new FileStorageBuilderMonoDbImpl(this, dataSource);
   }
 
   private void checkStorageTypeSelected() {

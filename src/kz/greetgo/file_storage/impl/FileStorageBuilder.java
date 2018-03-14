@@ -58,7 +58,7 @@ public interface FileStorageBuilder {
    * @param dataSource источник конектов к БД, чтобы создать хнанителя файлов в БД
    * @return ссылка на строителя для продолжения создания хранилища файлов
    */
-  FileStorageBuilderDb inDb(DataSource dataSource);
+  FileStorageBuilderMonoDb inDb(DataSource dataSource);
 
   /**
    * Указывает хранение файлов в нескольких реляционных БД

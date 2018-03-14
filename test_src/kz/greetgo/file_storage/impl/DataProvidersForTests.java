@@ -5,7 +5,6 @@ import kz.greetgo.file_storage.impl.logging.FileStorageLogger;
 import kz.greetgo.file_storage.impl.logging.SqlLogger;
 import kz.greetgo.file_storage.impl.logging.events.FileStorageLoggerErrorEvent;
 import kz.greetgo.file_storage.impl.logging.events.FileStorageLoggerEvent;
-import kz.greetgo.file_storage.impl.util.FileStorageCreator;
 import kz.greetgo.file_storage.impl.util.TestUtil;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;

@@ -4,10 +4,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
 
-public abstract class AbstractStorageDao implements StorageDao {
-  protected final FileStorageBuilderDbImpl builder;
+public abstract class AbstractStorageMonoDbDao implements StorageMonoDbDao {
+  protected final FileStorageBuilderMonoDbImpl builder;
 
-  protected AbstractStorageDao(FileStorageBuilderDbImpl builder) {this.builder = builder;}
+  protected AbstractStorageMonoDbDao(FileStorageBuilderMonoDbImpl builder) {this.builder = builder;}
 
   private static final String PREFIX = "__";
   private static final String SUFFIX = "__";

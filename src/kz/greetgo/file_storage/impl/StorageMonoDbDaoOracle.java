@@ -8,8 +8,8 @@ import kz.greetgo.file_storage.impl.jdbc.Query;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class StorageDaoOracle extends StorageDaoPostgres {
-  StorageDaoOracle(FileStorageBuilderDbImpl builder) {
+public class StorageMonoDbDaoOracle extends StorageMonoDbDaoPostgres {
+  StorageMonoDbDaoOracle(FileStorageBuilderMonoDbImpl builder) {
     super(builder);
 
     if (builder.paramsTable.length() > 30) throw new Ora00972_IdentifierIsTooLong("builder.paramsTable = '"

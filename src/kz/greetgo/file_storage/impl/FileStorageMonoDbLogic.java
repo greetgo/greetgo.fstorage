@@ -11,14 +11,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 
-public class FileStorageBridge implements FileStorage {
+public class FileStorageMonoDbLogic implements FileStorage {
 
   private final FileStorageBuilderImpl builder;
-  private final StorageDao storageDao;
+  private final StorageMonoDbDao storageMonoDbDao;
 
-  FileStorageBridge(FileStorageBuilderImpl builder, StorageDao storageDao) {
+  FileStorageMonoDbLogic(FileStorageBuilderImpl builder, StorageMonoDbDao storageMonoDbDao) {
     this.builder = builder;
-    this.storageDao = storageDao;
+    this.storageMonoDbDao = storageMonoDbDao;
   }
 
   @Override
@@ -84,10 +84,10 @@ public class FileStorageBridge implements FileStorage {
         builder.checkName(params.name);
         builder.checkMimeType(params.mimeType);
         try {
-          return storageDao.createNew(getData(), params);
+          return storageMonoDbDao.createNew(getData(), params);
         } catch (DatabaseNotPrepared databaseNotPrepared) {
-          storageDao.prepareDatabase(databaseNotPrepared);
-          return storageDao.createNew(getData(), params);
+          storageMonoDbDao.prepareDatabase(databaseNotPrepared);
+          return storageMonoDbDao.createNew(getData(), params);
         }
       }
     };
@@ -126,7 +126,7 @@ public class FileStorageBridge implements FileStorage {
 
   @Override
   public FileDataReader readOrNull(String fileId) {
-    final FileParams params = storageDao.readParams(fileId);
+    final FileParams params = storageMonoDbDao.readParams(fileId);
 
     if (params == null) return null;
 
@@ -138,7 +138,7 @@ public class FileStorageBridge implements FileStorage {
 
       @Override
       public byte[] dataAsArray() {
-        return storageDao.getDataAsArray(params.sha1sum);
+        return storageMonoDbDao.getDataAsArray(params.sha1sum);
       }
 
       @Override
