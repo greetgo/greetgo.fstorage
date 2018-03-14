@@ -4,7 +4,6 @@ import kz.greetgo.db.DbType;
 import kz.greetgo.file_storage.FileDataReader;
 import kz.greetgo.file_storage.FileStorage;
 import kz.greetgo.file_storage.impl.util.RND;
-import kz.greetgo.file_storage.impl.util.TestUtil;
 import org.testng.annotations.Test;
 
 import javax.sql.DataSource;
@@ -18,20 +17,12 @@ import static org.fest.assertions.api.Assertions.assertThat;
 public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
   public static final String SCHEMA_PREFIX = "multi_fs";
 
-  private List<DataSource> dataSourceList(DbType dbType, int count) {
-    List<DataSource> ret = new ArrayList<>();
-    for (int i = 1; i <= count; i++) {
-      ret.add(TestUtil.createFrom(dbType, SCHEMA_PREFIX + "_" + i));
-    }
-    return ret;
-  }
-
 
   @Test(dataProvider = "dbTypeDataProvider")
   public void defaultValue_tableIndexLength(DbType dbType) throws Exception {
     FileStorageBuilderMultiDb builder = FileStorageBuilder
       .newBuilder()
-      .inMultiDb(dataSourceList(dbType, 3));
+      .inMultiDb(dataSourceList(dbType, SCHEMA_PREFIX, 3));
 
     assertThat(builder.getTableIndexLength()).isEqualTo(5);
 
@@ -44,7 +35,7 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
   public void defaultValue_tableName(DbType dbType) throws Exception {
     FileStorageBuilderMultiDb builder = FileStorageBuilder
       .newBuilder()
-      .inMultiDb(dataSourceList(dbType, 3));
+      .inMultiDb(dataSourceList(dbType, SCHEMA_PREFIX, 3));
 
     assertThat(builder.getTableName()).isEqualTo("file_storage");
 
@@ -58,7 +49,7 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
   public void defaultValue_tableCountPerDb(DbType dbType) throws Exception {
     FileStorageBuilderMultiDb builder = FileStorageBuilder
       .newBuilder()
-      .inMultiDb(dataSourceList(dbType, 3));
+      .inMultiDb(dataSourceList(dbType, SCHEMA_PREFIX, 3));
 
     assertThat(builder.getTableCountPerDb()).isEqualTo(12);
 
@@ -71,7 +62,7 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
   public void defaultValue_tableDetector(DbType dbType) throws Exception {
     FileStorageBuilderMultiDb builder = FileStorageBuilder
       .newBuilder()
-      .inMultiDb(dataSourceList(dbType, 3));
+      .inMultiDb(dataSourceList(dbType, SCHEMA_PREFIX, 3));
 
     assertThat(builder.getTableSelector()).isNotNull();
 
@@ -93,7 +84,7 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
 
   @Test(dataProvider = "dbTypeDataProvider")
   public void store_read_parallelCreation(DbType dbType) throws Exception {
-    List<DataSource> dataSourceList = dataSourceList(dbType, 3);
+    List<DataSource> dataSourceList = dataSourceList(dbType, SCHEMA_PREFIX, 3);
 
     FileStorage fileStorage = FileStorageBuilder
       .newBuilder()
@@ -140,7 +131,7 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
 
   @Test(dataProvider = "dbTypeDataProvider")
   public void store_read_parallelCreation_manyRecords(DbType dbType) throws Exception {
-    List<DataSource> dataSourceList = dataSourceList(dbType, 3);
+    List<DataSource> dataSourceList = dataSourceList(dbType, SCHEMA_PREFIX, 3);
 
     FileStorage fileStorage = FileStorageBuilder
       .newBuilder()

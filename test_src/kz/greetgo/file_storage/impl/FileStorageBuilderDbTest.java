@@ -10,14 +10,9 @@ import kz.greetgo.file_storage.errors.NoFileName;
 import kz.greetgo.file_storage.errors.NoFileWithId;
 import kz.greetgo.file_storage.errors.Ora00972_IdentifierIsTooLong;
 import kz.greetgo.file_storage.errors.UnknownMimeType;
-import kz.greetgo.file_storage.impl.logging.FileStorageLogger;
-import kz.greetgo.file_storage.impl.logging.SqlLogger;
-import kz.greetgo.file_storage.impl.logging.events.FileStorageLoggerErrorEvent;
-import kz.greetgo.file_storage.impl.logging.events.FileStorageLoggerEvent;
 import kz.greetgo.file_storage.impl.util.RND;
 import kz.greetgo.file_storage.impl.util.TestUtil;
 import org.fest.assertions.api.Assertions;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -32,28 +27,6 @@ import static org.fest.assertions.api.Assertions.assertThat;
 public class FileStorageBuilderDbTest extends DataProvidersForTests {
 
   public static final String SCHEMA = "fs2";
-
-  @BeforeMethod
-  public void setNewSqlLogger_to_FileStorageLogger() throws Exception {
-    FileStorageLogger.setNewSqlLogger(new SqlLogger() {
-      @Override
-      public boolean isTraceEnabled() {
-        return true;
-      }
-
-      @Override
-      public void trace(FileStorageLoggerEvent event) {
-        System.out.println(event);
-      }
-
-      @Override
-      public void error(FileStorageLoggerErrorEvent event) {
-        System.out.println(event);
-      }
-
-
-    });
-  }
 
   @Test(dataProvider = "dbTypeDataProvider")
   public void store_read(DbType dbType) throws Exception {
