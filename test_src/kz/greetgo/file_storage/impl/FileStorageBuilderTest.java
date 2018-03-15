@@ -52,6 +52,9 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
       .data(content.getBytes(StandardCharsets.UTF_8))
       .store();
 
+    assertThat(fileId).isNotNull();
+    assertThat(fileId).isNotEmpty();
+
     FileDataReader reader = fileStorage.read(fileId);
     assertThat(reader).isNotNull();
     assertThat(reader.id()).isEqualTo(fileId);

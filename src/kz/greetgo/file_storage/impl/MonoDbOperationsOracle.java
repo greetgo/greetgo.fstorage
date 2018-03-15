@@ -8,8 +8,8 @@ import kz.greetgo.file_storage.impl.jdbc.Query;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class StorageMonoDbDaoOracle extends StorageMonoDbDaoPostgres {
-  StorageMonoDbDaoOracle(FileStorageBuilderMonoDbImpl builder) {
+public class MonoDbOperationsOracle extends MonoDbOperationsPostgres {
+  MonoDbOperationsOracle(FileStorageBuilderMonoDbImpl builder) {
     super(builder);
 
     if (builder.paramsTable.length() > 30) throw new Ora00972_IdentifierIsTooLong("builder.paramsTable = '"
@@ -43,16 +43,16 @@ public class StorageMonoDbDaoOracle extends StorageMonoDbDaoPostgres {
 
           //noinspection StringBufferReplaceableByString
           StringBuilder sql = new StringBuilder();
-//          sql.append("merge into __dataTable__ dest using ( select ? as id1, ? as data1 from dual ) src ");
-//          sql.append(" on (dest.__dataTableId__ = src.id1 and dest.__dataTableData__ = src.data1)");
-//          sql.append(" when not matched then insert (dest.__dataTableId__, dest.__dataTableData__)");
-//          sql.append("                       values ( src.id1,              src.data1            )");
+//          structure.append("merge into __dataTable__ dest using ( select ? as id1, ? as data1 from dual ) src ");
+//          structure.append(" on (dest.__dataTableId__ = src.id1 and dest.__dataTableData__ = src.data1)");
+//          structure.append(" when not matched then insert (dest.__dataTableId__, dest.__dataTableData__)");
+//          structure.append("                       values ( src.id1,              src.data1            )");
 
           sql.append("insert into __dataTable__ (__dataTableId__, __dataTableData__)");
           sql.append(" values (?, ?)");
 
           try (Query query = new Query(connection)) {
-            query.sql = sql(sql.toString());
+            query.sql.append(sql(sql.toString()));
             query.params.add(sha1sum);
             query.params.add(data);
             query.update();

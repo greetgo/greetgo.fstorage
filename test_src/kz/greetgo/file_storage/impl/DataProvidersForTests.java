@@ -19,7 +19,7 @@ public class DataProvidersForTests {
     FileStorageLogger.setNewSqlLogger(new SqlLogger() {
       @Override
       public boolean isTraceEnabled() {
-        return true;
+        return traceSql();
       }
 
       @Override
@@ -29,11 +29,13 @@ public class DataProvidersForTests {
 
       @Override
       public void error(FileStorageLoggerErrorEvent event) {
-        System.out.println(event);
+        if (traceSql()) System.out.println(event);
       }
-
-
     });
+  }
+
+  protected boolean traceSql() {
+    return true;
   }
 
   protected DbType[] dbTypes() {

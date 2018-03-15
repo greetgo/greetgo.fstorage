@@ -4,13 +4,15 @@ import kz.greetgo.db.DbType;
 import kz.greetgo.file_storage.FileDataReader;
 import kz.greetgo.file_storage.FileStorage;
 import kz.greetgo.file_storage.impl.util.RND;
+import org.fest.assertions.api.Assertions;
 import org.testng.annotations.Test;
 
 import javax.sql.DataSource;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -121,12 +123,19 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
 
     for (int i = 0; i < dataArray.length; i++) {
 
+      if (fileIdArray[i] == null) Assertions.fail("fileIdArray[" + i + "] == null");
+
       FileDataReader reader = fileStorage.read(fileIdArray[i]);
       assertThat(reader.id()).isEqualTo(fileIdArray[i]);
       assertThat(reader.id()).startsWith("1-2-");
       assertThat(new String(reader.dataAsArray(), StandardCharsets.UTF_8)).startsWith(dataArray[i]);
 
     }
+  }
+
+  @Override
+  protected boolean traceSql() {
+    return false;
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
@@ -143,34 +152,44 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
       final String name;
       final String content;
 
-      String fileId;
+      final AtomicReference<String> fileId = new AtomicReference<>(null);
 
       public Dot(String name, String content) {
         this.name = name;
         this.content = content;
       }
+
+      @Override
+      public String toString() {
+        return "name = " + name + ", fileId = " + fileId.get();
+      }
     }
 
     List<Dot> list = new ArrayList<>();
-    for (int i = 0; i < 10_000; i++) {
+    for (int i = 0; i < 100; i++) {
       list.add(new Dot("Файл" + i, "Содержание " + RND.str(500)));
     }
 
     {
-      ArrayBlockingQueue<Dot> queue = new ArrayBlockingQueue<>(5000, false);
+      LinkedList<Dot> queue = new LinkedList<>();
       queue.addAll(list);
 
       List<Thread> threadList = new ArrayList<>();
-      for (int i = 0; i < 13; i++) {
+      for (int i = 0; i < 7; i++) {
         threadList.add(new Thread(() -> {
 
           while (true) {
-            Dot dot = queue.poll();
+            Dot dot;
+
+            synchronized (queue) {
+              dot = queue.poll();
+            }
+
             if (dot == null) return;
-            dot.fileId = fileStorage.storing()
+            dot.fileId.set(fileStorage.storing()
               .name(dot.name)
               .data(dot.content.getBytes(StandardCharsets.UTF_8))
-              .store();
+              .store());
           }
 
         }));
@@ -183,15 +202,10 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
     }
 
     for (Dot dot : list) {
-
-      FileDataReader reader = fileStorage.read(dot.fileId);
-
-      assertThat(reader.id()).isEqualTo(dot.fileId);
+      FileDataReader reader = fileStorage.read(dot.fileId.get());
+      assertThat(reader.id()).isEqualTo(dot.fileId.get());
       assertThat(new String(reader.dataAsArray(), StandardCharsets.UTF_8)).isEqualTo(dot.content);
       assertThat(reader.name()).isEqualTo(dot.name);
-
     }
-
   }
-
 }

@@ -4,7 +4,7 @@ public class NoFileWithId extends FileStorageError {
   public final String fileId;
 
   public NoFileWithId(String fileId) {
-    super("No file with id = ");
+    super("No file with id = " + fileId);
     this.fileId = fileId;
   }
 }

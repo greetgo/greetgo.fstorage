@@ -1,6 +1,6 @@
 package kz.greetgo.file_storage.impl;
 
-public interface StorageMonoDbDao {
+public interface MonoDbOperations {
   String createNew(byte[] data, CreateNewParams params) throws DatabaseNotPrepared;
 
   void prepareDatabase(DatabaseNotPrepared context);

@@ -154,8 +154,8 @@ class FileStorageBuilderMonoDbImpl implements FileStorageBuilderMonoDb {
     parent.fixed = true;
     return FileStorageCreator.selectDb(
       dataSource,
-      () -> new FileStorageMonoDbLogic(parent, new StorageMonoDbDaoPostgres(this)),
-      () -> new FileStorageMonoDbLogic(parent, new StorageMonoDbDaoOracle(this))
+      () -> new FileStorageMonoDbLogic(parent, new MonoDbOperationsPostgres(this)),
+      () -> new FileStorageMonoDbLogic(parent, new MonoDbOperationsOracle(this))
     );
   }
 

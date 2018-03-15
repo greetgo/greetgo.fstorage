@@ -18,24 +18,28 @@ public class Query implements AutoCloseable {
     this.connection = connection;
   }
 
-  public String sql;
+  public final StringBuilder sql = new StringBuilder();
   public List<Object> params = new ArrayList<>();
 
   private ResultSet rs = null;
 
-  public ResultSet rs() throws SQLException {
-    if (rs != null) return rs;
+  public Query go() throws SQLException {
     prepareStatement();
     if (updated) throw new IllegalStateException("Please create new Query");
 
     try {
       rs = ps.executeQuery();
       queryExecutedAt = System.nanoTime();
-      return rs;
+      return this;
     } catch (SQLException | RuntimeException e) {
-      FileStorageLogger.errorExecuteQuery(sql, params, e, startedAt, preparedAt, System.nanoTime());
+      FileStorageLogger.errorExecuteQuery(sql.toString(), params, e, startedAt, preparedAt, System.nanoTime());
       throw e;
     }
+  }
+
+  public ResultSet rs() throws SQLException {
+    if (rs == null) throw new RuntimeException("Please call go()");
+    return rs;
   }
 
   private PreparedStatement ps = null;
@@ -49,9 +53,9 @@ public class Query implements AutoCloseable {
     startedAt = System.nanoTime();
 
     try {
-      ps = connection.prepareStatement(sql);
+      ps = connection.prepareStatement(sql.toString());
     } catch (SQLException | RuntimeException e) {
-      FileStorageLogger.errorPrepareStatement(sql, e, startedAt, System.nanoTime());
+      FileStorageLogger.errorPrepareStatement(sql.toString(), e, startedAt, System.nanoTime());
       throw e;
     }
 
@@ -69,7 +73,7 @@ public class Query implements AutoCloseable {
       }
 
     } catch (SQLException | RuntimeException e) {
-      FileStorageLogger.errorSetParameter(sql, params, index, e, startedAt, preparedAt, System.nanoTime());
+      FileStorageLogger.errorSetParameter(sql.toString(), params, index, e, startedAt, preparedAt, System.nanoTime());
       throw e;
     }
 
@@ -85,7 +89,7 @@ public class Query implements AutoCloseable {
     try {
       return updateCount = ps.executeUpdate();
     } catch (SQLException | RuntimeException e) {
-      FileStorageLogger.errorExecuteUpdate(sql, params, e, startedAt, preparedAt, System.nanoTime());
+      FileStorageLogger.errorExecuteUpdate(sql.toString(), params, e, startedAt, preparedAt, System.nanoTime());
       throw e;
     }
   }
@@ -99,7 +103,7 @@ public class Query implements AutoCloseable {
         rs.close();
       } catch (SQLException | RuntimeException e) {
         if (startedAt != null) {
-          FileStorageLogger.errorCloseResultSet(sql, params, e, startedAt, preparedAt, System.nanoTime());
+          FileStorageLogger.errorCloseResultSet(sql.toString(), params, e, startedAt, preparedAt, System.nanoTime());
         }
         throw e;
       }
@@ -111,10 +115,10 @@ public class Query implements AutoCloseable {
       } catch (SQLException | RuntimeException e) {
         if (startedAt != null) {
           if (queryExecutedAt != null) {
-            FileStorageLogger.errorClosePreparedStatementWithResultSet(sql, params, e,
+            FileStorageLogger.errorClosePreparedStatementWithResultSet(sql.toString(), params, e,
               startedAt, preparedAt, queryExecutedAt, System.nanoTime());
           } else {
-            FileStorageLogger.errorClosePreparedStatementOnUpdate(sql, params, e,
+            FileStorageLogger.errorClosePreparedStatementOnUpdate(sql.toString(), params, e,
               startedAt, preparedAt, System.nanoTime());
           }
         }
@@ -128,11 +132,11 @@ public class Query implements AutoCloseable {
 
       if (queryExecutedAt == null) {
 
-        FileStorageLogger.traceExecuteUpdate(sql, params, updateCount, startedAt, preparedAt, System.nanoTime());
+        FileStorageLogger.traceExecuteUpdate(sql.toString(), params, updateCount, startedAt, preparedAt, System.nanoTime());
 
       } else {
 
-        FileStorageLogger.traceSelect(sql, params, startedAt, preparedAt, queryExecutedAt, System.nanoTime());
+        FileStorageLogger.traceSelect(sql.toString(), params, startedAt, preparedAt, queryExecutedAt, System.nanoTime());
 
       }
 
@@ -140,16 +144,16 @@ public class Query implements AutoCloseable {
 
   }
 
-  public void exec(String sql) throws SQLException {
+  public void exec(CharSequence sql) throws SQLException {
     if (ps != null) throw new IllegalStateException("Please create new Query");
     long startedAt = System.nanoTime();
     try (Statement statement = connection.createStatement()) {
-      statement.execute(sql);
+      statement.execute(sql.toString());
       if (FileStorageLogger.isTraceEnabled()) {
-        FileStorageLogger.traceSimpleSql(sql, startedAt, System.nanoTime());
+        FileStorageLogger.traceSimpleSql(sql.toString(), startedAt, System.nanoTime());
       }
     } catch (SQLException | RuntimeException e) {
-      FileStorageLogger.errorSimpleSql(sql, e, startedAt, System.nanoTime());
+      FileStorageLogger.errorSimpleSql(sql.toString(), e, startedAt, System.nanoTime());
       throw e;
     }
   }

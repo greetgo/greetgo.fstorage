@@ -79,7 +79,7 @@ public class Inserting {
 
       try (Query query = new Query(connection)) {
 
-        query.sql = sqlPreparation.apply(sql.toString());
+        query.sql.append(sqlPreparation.apply(sql.toString()));
 
         query.params = fields.stream()
           .filter(f -> f instanceof FieldWithValue)

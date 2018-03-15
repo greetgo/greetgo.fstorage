@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class StreamUtil {
+public class LocalUtil {
   public static byte[] readAll(InputStream inputStream) {
     try {
       return readAllEx(inputStream);
@@ -22,5 +22,12 @@ public class StreamUtil {
       if (count < 0) return out.toByteArray();
       out.write(buffer, 0, count);
     }
+  }
+
+  public static String toStrLen(int value, int len) {
+    StringBuilder sb = new StringBuilder(len);
+    sb.append(value);
+    while (sb.length() < len) sb.insert(0, '0');
+    return sb.toString();
   }
 }

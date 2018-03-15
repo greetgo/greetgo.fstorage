@@ -7,4 +7,12 @@ public class TablePosition {
     this.dbIndex = dbIndex;
     this.tableIndex = tableIndex;
   }
+
+  @Override
+  public String toString() {
+    return "TablePosition{" +
+      "dbIndex=" + dbIndex +
+      ", tableIndex=" + tableIndex +
+      '}';
+  }
 }

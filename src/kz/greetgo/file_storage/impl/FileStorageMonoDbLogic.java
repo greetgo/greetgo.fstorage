@@ -12,11 +12,11 @@ import java.util.Date;
 public class FileStorageMonoDbLogic implements FileStorage {
 
   private final FileStorageBuilderImpl builder;
-  private final StorageMonoDbDao storageMonoDbDao;
+  private final MonoDbOperations monoDbOperations;
 
-  FileStorageMonoDbLogic(FileStorageBuilderImpl builder, StorageMonoDbDao storageMonoDbDao) {
+  FileStorageMonoDbLogic(FileStorageBuilderImpl builder, MonoDbOperations monoDbOperations) {
     this.builder = builder;
-    this.storageMonoDbDao = storageMonoDbDao;
+    this.monoDbOperations = monoDbOperations;
   }
 
   @Override
@@ -66,7 +66,7 @@ public class FileStorageMonoDbLogic implements FileStorage {
 
       private byte[] getData() {
         if (data != null) return data;
-        if (inputStream != null) return StreamUtil.readAll(inputStream);
+        if (inputStream != null) return LocalUtil.readAll(inputStream);
         throw new NoFileData();
       }
 
@@ -82,10 +82,10 @@ public class FileStorageMonoDbLogic implements FileStorage {
         builder.checkName(params.name);
         builder.checkMimeType(params.mimeType);
         try {
-          return storageMonoDbDao.createNew(getData(), params);
+          return monoDbOperations.createNew(getData(), params);
         } catch (DatabaseNotPrepared databaseNotPrepared) {
-          storageMonoDbDao.prepareDatabase(databaseNotPrepared);
-          return storageMonoDbDao.createNew(getData(), params);
+          monoDbOperations.prepareDatabase(databaseNotPrepared);
+          return monoDbOperations.createNew(getData(), params);
         }
       }
     };
@@ -104,7 +104,7 @@ public class FileStorageMonoDbLogic implements FileStorage {
 
   @Override
   public FileDataReader readOrNull(String fileId) {
-    final FileParams params = storageMonoDbDao.readParams(fileId);
+    final FileParams params = monoDbOperations.readParams(fileId);
 
     if (params == null) return null;
 
@@ -131,7 +131,7 @@ public class FileStorageMonoDbLogic implements FileStorage {
             if (data != null) return data;
           }
 
-          return data = storageMonoDbDao.getDataAsArray(params.sha1sum);
+          return data = monoDbOperations.getDataAsArray(params.sha1sum);
         }
       }
 

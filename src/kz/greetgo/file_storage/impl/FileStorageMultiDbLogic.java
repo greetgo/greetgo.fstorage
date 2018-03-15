@@ -6,11 +6,16 @@ import kz.greetgo.file_storage.FileStoringOperation;
 import kz.greetgo.file_storage.errors.NoFileData;
 import kz.greetgo.file_storage.errors.NoFileWithId;
 import kz.greetgo.file_storage.errors.TableIsAbsent;
+import kz.greetgo.file_storage.impl.jdbc.insert.Insert;
+import kz.greetgo.file_storage.impl.jdbc.structure.Field;
+import kz.greetgo.file_storage.impl.jdbc.structure.FieldType;
+import kz.greetgo.file_storage.impl.jdbc.structure.Table;
 
+import javax.sql.DataSource;
 import java.io.InputStream;
 import java.util.Date;
 
-import static kz.greetgo.file_storage.impl.StreamUtil.readAll;
+import static kz.greetgo.file_storage.impl.LocalUtil.readAll;
 
 public class FileStorageMultiDbLogic implements FileStorage {
   private final FileStorageBuilderImpl parent;
@@ -86,11 +91,17 @@ public class FileStorageMultiDbLogic implements FileStorage {
       public String store() {
         builder.parent.checkName(params.name);
         builder.parent.checkMimeType(params.mimeType);
+
+        String fileId = params.presetFileId;
+        if (fileId == null) fileId = parent.idGenerator.get();
+
         try {
-          return createNew(getData(), params);
+          createNew(getData(), params, fileId);
+          return fileId;
         } catch (TableIsAbsent e) {
-          createTableWithoutThrows(e.tablePosition);
-          return createNew(getData(), params);
+          createTableQuiet(fileId);
+          createNew(getData(), params, fileId);
+          return fileId;
         }
       }
     };
@@ -105,6 +116,7 @@ public class FileStorageMultiDbLogic implements FileStorage {
 
   @Override
   public FileDataReader readOrNull(String fileId) {
+    if (fileId == null || fileId.length() == 0) throw new IllegalArgumentException("fileId = " + fileId);
 
     FileParams params = loadFileParams(fileId);
 
@@ -154,24 +166,109 @@ public class FileStorageMultiDbLogic implements FileStorage {
     };
   }
 
-  ////////////////
-  ////////////////
-  ////////////////
-  ////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  private void createTableWithoutThrows(TablePosition tablePosition) {
+  private static final String FIELD_ID = "id";
+  private static final String FIELD_NAME = "name";
+  private static final String FIELD_CREATED_AT = "created_at";
+  private static final String FIELD_MIME_TYPE = "mime_type";
+  private static final String FIELD_FILE_CONTENT = "file_content";
 
+  private String tableName(TablePosition tablePosition) {
+    return builder.tableName + "_" + LocalUtil.toStrLen(tablePosition.tableIndex, builder.tableIndexLength);
   }
 
-  private String createNew(byte[] data, CreateNewParams params) {
-    return null;
+  private void createTableQuiet(String fileId) {
+    TablePosition tablePosition = builder.tableSelector.selectTable(fileId);
+
+    Table table = new Table(tableName(tablePosition));
+
+    {
+      Field f = table.addField();
+      f.primaryKey = true;
+      f.type = FieldType.STR;
+      f.valueLen = parent.fileIdLength;
+      f.name = FIELD_ID;
+      f.notNull = true;
+    }
+    {
+      Field f = table.addField();
+      f.primaryKey = false;
+      f.type = FieldType.STR;
+      f.valueLen = 255;
+      f.name = FIELD_NAME;
+      f.notNull = parent.mandatoryName;
+    }
+    {
+      Field f = table.addField();
+      f.primaryKey = false;
+      f.type = FieldType.TIMESTAMP;
+      f.defaultCurrentTimestamp = true;
+      f.name = FIELD_CREATED_AT;
+      f.notNull = true;
+    }
+    {
+      Field f = table.addField();
+      f.primaryKey = false;
+      f.type = FieldType.STR;
+      f.name = FIELD_MIME_TYPE;
+      f.valueLen = 255;
+      f.notNull = parent.mandatoryMimeType;
+    }
+    {
+      Field f = table.addField();
+      f.primaryKey = false;
+      f.type = FieldType.BLOB;
+      f.name = FIELD_FILE_CONTENT;
+      f.notNull = false;
+    }
+
+    DataSource dataSource = extractDataSource(tablePosition);
+
+    operations.createTableQuiet(dataSource, table);
+  }
+
+  private DataSource extractDataSource(TablePosition tablePosition) {
+    return builder.dataSourceList.get(tablePosition.dbIndex);
+  }
+
+  private void createNew(byte[] data, CreateNewParams params, String fileId) throws TableIsAbsent {
+    TablePosition tablePosition = builder.tableSelector.selectTable(fileId);
+    DataSource dataSource = extractDataSource(tablePosition);
+
+    Insert insert = new Insert(tableName(tablePosition));
+    insert.add(FIELD_ID, fileId);
+    insert.add(FIELD_FILE_CONTENT, data);
+    if (params.mimeType != null) insert.add(FIELD_MIME_TYPE, params.mimeType);
+    if (params.name != null) insert.add(FIELD_NAME, params.name);
+
+    operations.insert(dataSource, insert, tablePosition);
   }
 
   private byte[] loadData(String fileId) {
-    return new byte[0];
+
+    TablePosition tablePosition = builder.tableSelector.selectTable(fileId);
+    String tableName = tableName(tablePosition);
+    DataSource dataSource = extractDataSource(tablePosition);
+
+    return operations.loadData(dataSource, tableName, FIELD_ID, fileId, FIELD_FILE_CONTENT);
   }
 
   private FileParams loadFileParams(String fileId) {
-    return null;
+
+    TablePosition tablePosition = builder.tableSelector.selectTable(fileId);
+    DataSource dataSource = extractDataSource(tablePosition);
+    String tableName = tableName(tablePosition);
+
+    TableFieldNames names = new TableFieldNames();
+    names.id = FIELD_ID;
+    names.name = FIELD_NAME;
+    names.mimeType = FIELD_MIME_TYPE;
+    names.createdAt = FIELD_CREATED_AT;
+
+    return operations.loadFileParams(dataSource, tableName, fileId, names);
   }
 }

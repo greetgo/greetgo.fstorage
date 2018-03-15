@@ -68,7 +68,7 @@ public class FileStorageBuilderMultiDbImpl implements FileStorageBuilderMultiDb 
     return this;
   }
 
-  private TableSelector tableSelector = new TableSelector() {
+  TableSelector tableSelector = new TableSelector() {
     @Override
     public TablePosition selectTable(String fileId) {
       int hashCode = fileId == null ? 0 : fileId.hashCode();

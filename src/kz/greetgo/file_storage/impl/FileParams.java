@@ -8,4 +8,14 @@ class FileParams {
   String name;
   Date lastModifiedBy;
   String mimeType;
+
+  @Override
+  public String toString() {
+    return "FileParams{" +
+      "id='" + id + '\'' +
+      ", name='" + name + '\'' +
+      ", lastModifiedBy=" + lastModifiedBy +
+      ", mimeType='" + mimeType + '\'' +
+      '}';
+  }
 }

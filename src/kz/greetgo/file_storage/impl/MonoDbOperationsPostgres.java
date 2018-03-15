@@ -7,8 +7,8 @@ import kz.greetgo.file_storage.impl.jdbc.Query;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class StorageMonoDbDaoPostgres extends AbstractStorageMonoDbDao {
-  StorageMonoDbDaoPostgres(FileStorageBuilderMonoDbImpl builder) {
+public class MonoDbOperationsPostgres extends AbstractMonoDbOperations {
+  MonoDbOperationsPostgres(FileStorageBuilderMonoDbImpl builder) {
     super(builder);
   }
 
@@ -124,8 +124,10 @@ public class StorageMonoDbDaoPostgres extends AbstractStorageMonoDbDao {
     try (Connection connection = builder.dataSource.getConnection()) {
 
       try (Query query = new Query(connection)) {
-        query.sql = sql("select * from __paramsTable__ where __paramsTableId__ = ?");
+        query.sql.append(sql("select * from __paramsTable__ where __paramsTableId__ = ?"));
         query.params.add(fileId);
+
+        query.go();
 
         if (!query.rs().next()) return null;
 
@@ -157,8 +159,11 @@ public class StorageMonoDbDaoPostgres extends AbstractStorageMonoDbDao {
     try (Connection connection = builder.dataSource.getConnection()) {
 
       try (Query query = new Query(connection)) {
-        query.sql = sql("select __dataTableData__ from __dataTable__ where __dataTableId__ = ?");
+        query.sql.append(sql("select __dataTableData__ from __dataTable__ where __dataTableId__ = ?"));
         query.params.add(sha1sum);
+
+        query.go();
+
         if (!query.rs().next()) throw new RuntimeException("No data for sha1sum = " + sha1sum);
         return query.rs().getBytes(1);
       }
