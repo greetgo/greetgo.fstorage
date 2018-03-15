@@ -9,36 +9,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ConnectionManagerOracle extends ConnectionManager {
-
-  class DbConnector {
-    public final String url, username, password;
-
-    DbConnector(String url, String username, String password) {
-      this.url = url;
-      this.username = username;
-      this.password = password;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      DbConnector dbConnector = (DbConnector) o;
-      return Objects.equals(url, dbConnector.url) &&
-        Objects.equals(username, dbConnector.username) &&
-        Objects.equals(password, dbConnector.password);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(url, username, password);
-    }
-  }
 
   private static final ConcurrentHashMap<DbConnector, DataSource> dataSourceMap = new ConcurrentHashMap<>();
 
@@ -48,7 +22,13 @@ public class ConnectionManagerOracle extends ConnectionManager {
     return dataSourceMap.computeIfAbsent(new DbConnector(url, username, password), c -> {
 
       try {
-        DriverManager.getConnection(url(), mySchema(), mySchema()).close();
+        Class.forName("oracle.jdbc.pool.OracleDataSource");
+      } catch (ClassNotFoundException e) {
+        throw new RuntimeException(e);
+      }
+
+      try {
+        DriverManager.getConnection(c.url, c.username, c.password).close();
       } catch (SQLException e) {
         prepareDbSchema();
       }
@@ -79,14 +59,6 @@ public class ConnectionManagerOracle extends ConnectionManager {
   @Override
   public Connection getNewConnection() throws Exception {
     return getDataSource(url(), mySchema(), mySchema()).getConnection();
-
-    //    Class.forName("oracle.jdbc.driver.OracleDriver");
-//    try {
-//      return DriverManager.getConnection(url(), mySchema(), mySchema());
-//    } catch (SQLException e) {
-//      prepareDbSchema();
-//      return DriverManager.getConnection(url(), mySchema(), mySchema());
-//    }
   }
 
   private String url() {

@@ -6,8 +6,34 @@ import kz.greetgo.db.DbType;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Objects;
 
 public abstract class ConnectionManager {
+  class DbConnector {
+    public final String url, username, password;
+
+    DbConnector(String url, String username, String password) {
+      this.url = url;
+      this.username = username;
+      this.password = password;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      DbConnector dbConnector = (DbConnector) o;
+      return Objects.equals(url, dbConnector.url) &&
+        Objects.equals(username, dbConnector.username) &&
+        Objects.equals(password, dbConnector.password);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(url, username, password);
+    }
+  }
+
   private String dbSchema;
 
   public static ConnectionManager get(DbType dbType) {

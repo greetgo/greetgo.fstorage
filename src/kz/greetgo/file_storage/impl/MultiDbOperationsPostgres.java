@@ -40,6 +40,7 @@ public class MultiDbOperationsPostgres implements MultiDbOperations {
     } catch (SQLException e) {
       if ("23505".equals(e.getSQLState())) return;
       if ("42P07".equals(e.getSQLState())) return;
+      if ("42710".equals(e.getSQLState())) return;
       if (e.getMessage().startsWith("ORA-00955:")) return;
       throw new RuntimeException("e.getSQLState() = " + e.getSQLState() + " :: " + e.getMessage(), e);
     }

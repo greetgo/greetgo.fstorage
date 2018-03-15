@@ -15,6 +15,10 @@ import static kz.greetgo.file_storage.impl.util.TestUtil.createFrom;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 public class FileStorageBuilderTest extends DataProvidersForTests {
+  @Override
+  protected boolean traceSql() {
+    return false;
+  }
 
   @Test(expectedExceptions = StorageTypeAlreadySelected.class)
   public void inDb_inMultiDb_1() throws Exception {

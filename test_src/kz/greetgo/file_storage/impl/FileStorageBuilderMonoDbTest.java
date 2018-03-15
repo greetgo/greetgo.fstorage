@@ -28,6 +28,11 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
 
   public static final String SCHEMA = "fs2";
 
+  @Override
+  protected boolean traceSql() {
+    return false;
+  }
+
   @Test(dataProvider = "dbTypeDataProvider")
   public void store_read(DbType dbType) throws Exception {
 

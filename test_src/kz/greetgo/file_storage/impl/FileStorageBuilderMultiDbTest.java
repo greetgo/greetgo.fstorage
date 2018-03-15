@@ -19,6 +19,10 @@ import static org.fest.assertions.api.Assertions.assertThat;
 public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
   public static final String SCHEMA_PREFIX = "multi_fs";
 
+  @Override
+  protected boolean traceSql() {
+    return false;
+  }
 
   @Test(dataProvider = "dbTypeDataProvider")
   public void defaultValue_tableIndexLength(DbType dbType) throws Exception {
@@ -133,18 +137,15 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
     }
   }
 
-  @Override
-  protected boolean traceSql() {
-    return false;
-  }
 
   @Test(dataProvider = "dbTypeDataProvider")
   public void store_read_parallelCreation_manyRecords(DbType dbType) throws Exception {
-    List<DataSource> dataSourceList = dataSourceList(dbType, SCHEMA_PREFIX, 3);
+    List<DataSource> dataSourceList = dataSourceList(dbType, SCHEMA_PREFIX, 4);
 
     FileStorage fileStorage = FileStorageBuilder
       .newBuilder()
       .inMultiDb(dataSourceList)
+      .setTableCountPerDb(3)
       .setTableName("tn2_" + RND.intStr(10))
       .build();
 
