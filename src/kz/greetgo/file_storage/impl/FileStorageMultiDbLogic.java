@@ -5,18 +5,24 @@ import kz.greetgo.file_storage.FileStorage;
 import kz.greetgo.file_storage.FileStoringOperation;
 import kz.greetgo.file_storage.errors.NoFileData;
 import kz.greetgo.file_storage.errors.NoFileWithId;
+import kz.greetgo.file_storage.errors.TableIsAbsent;
 
 import java.io.InputStream;
 import java.util.Date;
 
-public class FileStorageMonoDbLogic implements FileStorage {
+import static kz.greetgo.file_storage.impl.StreamUtil.readAll;
 
-  private final FileStorageBuilderImpl builder;
-  private final StorageMonoDbDao storageMonoDbDao;
+public class FileStorageMultiDbLogic implements FileStorage {
+  private final FileStorageBuilderImpl parent;
+  private final FileStorageBuilderMultiDbImpl builder;
+  private final MultiDbOperations operations;
 
-  FileStorageMonoDbLogic(FileStorageBuilderImpl builder, StorageMonoDbDao storageMonoDbDao) {
+  public FileStorageMultiDbLogic(FileStorageBuilderImpl parent,
+                                 FileStorageBuilderMultiDbImpl builder,
+                                 MultiDbOperations operations) {
+    this.parent = parent;
     this.builder = builder;
-    this.storageMonoDbDao = storageMonoDbDao;
+    this.operations = operations;
   }
 
   @Override
@@ -31,14 +37,14 @@ public class FileStorageMonoDbLogic implements FileStorage {
       }
 
       @Override
-      public FileStoringOperation mimeType(String mimeType) {
-        params.mimeType = mimeType;
+      public FileStoringOperation lastModifiedAt(Date lastModifiedAt) {
+        params.lastModifiedAt = lastModifiedAt;
         return this;
       }
 
       @Override
-      public FileStoringOperation lastModifiedAt(Date lastModifiedAt) {
-        params.lastModifiedAt = lastModifiedAt;
+      public FileStoringOperation mimeType(String mimeType) {
+        params.mimeType = mimeType;
         return this;
       }
 
@@ -66,10 +72,9 @@ public class FileStorageMonoDbLogic implements FileStorage {
 
       private byte[] getData() {
         if (data != null) return data;
-        if (inputStream != null) return StreamUtil.readAll(inputStream);
+        if (inputStream != null) return readAll(inputStream);
         throw new NoFileData();
       }
-
 
       @Override
       public FileStoringOperation presetId(String presetFileId) {
@@ -79,32 +84,29 @@ public class FileStorageMonoDbLogic implements FileStorage {
 
       @Override
       public String store() {
-        builder.checkName(params.name);
-        builder.checkMimeType(params.mimeType);
+        builder.parent.checkName(params.name);
+        builder.parent.checkMimeType(params.mimeType);
         try {
-          return storageMonoDbDao.createNew(getData(), params);
-        } catch (DatabaseNotPrepared databaseNotPrepared) {
-          storageMonoDbDao.prepareDatabase(databaseNotPrepared);
-          return storageMonoDbDao.createNew(getData(), params);
+          return createNew(getData(), params);
+        } catch (TableIsAbsent e) {
+          createTableWithoutThrows(e.tablePosition);
+          return createNew(getData(), params);
         }
       }
     };
   }
 
-
   @Override
   public FileDataReader read(String fileId) throws NoFileWithId {
-
     FileDataReader reader = readOrNull(fileId);
-
     if (reader == null) throw new NoFileWithId(fileId);
-
     return reader;
   }
 
   @Override
   public FileDataReader readOrNull(String fileId) {
-    final FileParams params = storageMonoDbDao.readParams(fileId);
+
+    FileParams params = loadFileParams(fileId);
 
     if (params == null) return null;
 
@@ -114,12 +116,12 @@ public class FileStorageMonoDbLogic implements FileStorage {
         return params.name;
       }
 
-      byte[] data = null;
-
       final Object sync = new Object();
+      byte[] data = null;
 
       @Override
       public byte[] dataAsArray() {
+
         {
           byte[] data = this.data;
           if (data != null) return data;
@@ -131,7 +133,7 @@ public class FileStorageMonoDbLogic implements FileStorage {
             if (data != null) return data;
           }
 
-          return data = storageMonoDbDao.getDataAsArray(params.sha1sum);
+          return data = loadData(fileId);
         }
       }
 
@@ -150,5 +152,26 @@ public class FileStorageMonoDbLogic implements FileStorage {
         return params.id;
       }
     };
+  }
+
+  ////////////////
+  ////////////////
+  ////////////////
+  ////////////////
+
+  private void createTableWithoutThrows(TablePosition tablePosition) {
+
+  }
+
+  private String createNew(byte[] data, CreateNewParams params) {
+    return null;
+  }
+
+  private byte[] loadData(String fileId) {
+    return new byte[0];
+  }
+
+  private FileParams loadFileParams(String fileId) {
+    return null;
   }
 }

@@ -16,7 +16,16 @@ public class FileStorageBuilderMultiDbImpl implements FileStorageBuilderMultiDb 
 
   @Override
   public FileStorage build() {
-    throw new RuntimeException();
+    parent.fixed = true;
+    return FileStorageCreator.selectDb(dataSourceList.get(0), this::createForPostgres, this::createForOracle);
+  }
+
+  private FileStorage createForPostgres() {
+    return new FileStorageMultiDbLogic(parent, this, new MultiDbOperationsPostgres());
+  }
+
+  private FileStorage createForOracle() {
+    return new FileStorageMultiDbLogic(parent, this, new MultiDbOperationsOracle());
   }
 
   int tableIndexLength = 5;
