@@ -60,7 +60,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
     assertThat(reader).isNotNull();
     assertThat(new String(reader.dataAsArray(), StandardCharsets.UTF_8)).isEqualTo(data);
     assertThat(reader.name()).isEqualTo(name);
-    assertThat(reader.lastModifiedAt()).isEqualTo(lastModifiedAt);
+    assertThat(reader.createdAt()).isEqualTo(lastModifiedAt);
     assertThat(reader.id()).isEqualTo(fileId);
 
     String name2 = RND.str(10);
@@ -81,7 +81,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
     assertThat(reader2).isNotNull();
     assertThat(new String(reader2.dataAsArray(), StandardCharsets.UTF_8)).isEqualTo(data);
     assertThat(reader2.name()).isEqualTo(name2);
-    assertThat(reader2.lastModifiedAt()).isNotNull();
+    assertThat(reader2.createdAt()).isNotNull();
     assertThat(reader2.id()).isEqualTo(fileId2);
 
     assertThat(fileId).isNotEqualTo(fileId2);
@@ -230,7 +230,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
     assertThat(reader).isNotNull();
     assertThat(new String(reader.dataAsArray(), StandardCharsets.UTF_8)).isEqualTo(data);
     assertThat(reader.name()).isEqualTo(name);
-    assertThat(reader.lastModifiedAt()).isEqualTo(lastModifiedAt);
+    assertThat(reader.createdAt()).isEqualTo(lastModifiedAt);
     assertThat(reader.id()).isEqualTo(fileId);
   }
 

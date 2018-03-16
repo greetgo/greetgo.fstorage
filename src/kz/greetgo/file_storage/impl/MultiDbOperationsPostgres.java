@@ -162,7 +162,7 @@ public class MultiDbOperationsPostgres implements MultiDbOperations {
         ret.id = query.rs().getString(names.id);
         ret.name = query.rs().getString(names.name);
         ret.mimeType = query.rs().getString(names.mimeType);
-        ret.lastModifiedBy = query.rs().getTimestamp(names.createdAt);
+        ret.createdAt = query.rs().getTimestamp(names.createdAt);
         return ret;
       }
 

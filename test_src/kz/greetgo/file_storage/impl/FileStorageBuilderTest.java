@@ -126,4 +126,40 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
     FileDataReader reader = fileStorage.read(fileId);
     assertThat(reader.mimeType()).isEqualTo(name.substring(0, 5));
   }
+
+  @Test(dataProvider = "testStorageBuilder_DP")
+  public void probeMimeTypeBaseConfigurator_existsExtension(TestStorageBuilder builder) throws Exception {
+    MimeTypeBaseConfigurator.get().configure(builder.getBuilder());
+
+    FileStorage fileStorage = builder.build();
+
+    String content = "Привет " + RND.str(10);
+    String name = RND.str(10) + ".txt";
+
+    String fileId = fileStorage.storing()
+      .data(content.getBytes(StandardCharsets.UTF_8))
+      .name(name)
+      .store();
+
+    FileDataReader reader = fileStorage.read(fileId);
+    assertThat(reader.mimeType()).isEqualTo("text/plain");
+  }
+
+  @Test(dataProvider = "testStorageBuilder_DP")
+  public void probeMimeTypeBaseConfigurator_leftExtension(TestStorageBuilder builder) throws Exception {
+    MimeTypeBaseConfigurator.get().configure(builder.getBuilder());
+
+    FileStorage fileStorage = builder.build();
+
+    String content = "Привет " + RND.str(10);
+    String name = RND.str(10) + ".left_extension";
+
+    String fileId = fileStorage.storing()
+      .data(content.getBytes(StandardCharsets.UTF_8))
+      .name(name)
+      .store();
+
+    FileDataReader reader = fileStorage.read(fileId);
+    assertThat(reader.mimeType()).isNull();
+  }
 }

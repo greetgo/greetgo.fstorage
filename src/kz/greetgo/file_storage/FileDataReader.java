@@ -23,9 +23,9 @@ public interface FileDataReader {
   /**
    * Читает
    *
-   * @return дату и время последней модификации файла
+   * @return дату и время создания файла
    */
-  Date lastModifiedAt();
+  Date createdAt();
 
   /**
    * Читает

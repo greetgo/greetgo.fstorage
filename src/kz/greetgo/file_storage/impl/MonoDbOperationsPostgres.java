@@ -137,7 +137,7 @@ public class MonoDbOperationsPostgres extends AbstractMonoDbOperations {
         ret.sha1sum = query.rs().getString(builder.getParamsTableDataId());
         ret.name = query.rs().getString(builder.getParamsTableName());
         ret.mimeType = query.rs().getString(builder.getParamsTableMimeType());
-        ret.lastModifiedBy = query.rs().getTimestamp(builder.getParamsTableLastModifiedAt());
+        ret.createdAt = query.rs().getTimestamp(builder.getParamsTableLastModifiedAt());
 
         return ret;
       }

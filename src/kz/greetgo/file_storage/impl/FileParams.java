@@ -6,7 +6,7 @@ class FileParams {
   String id;
   String sha1sum;
   String name;
-  Date lastModifiedBy;
+  Date createdAt;
   String mimeType;
 
   @Override
@@ -14,7 +14,7 @@ class FileParams {
     return "FileParams{" +
       "id='" + id + '\'' +
       ", name='" + name + '\'' +
-      ", lastModifiedBy=" + lastModifiedBy +
+      ", createdAt=" + createdAt +
       ", mimeType='" + mimeType + '\'' +
       '}';
   }

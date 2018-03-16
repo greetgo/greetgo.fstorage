@@ -9,7 +9,6 @@ import kz.greetgo.file_storage.errors.UnknownMimeType;
 import javax.sql.DataSource;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -94,8 +93,8 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
   }
 
   @Override
-  public FileStorageBuilder configureFrom(Consumer<FileStorageBuilder> consumer) {
-    consumer.accept(this);
+  public FileStorageBuilder configureFrom(FileStorageBuilderConfigurator configurator) {
+    configurator.configure(this);
     return this;
   }
 

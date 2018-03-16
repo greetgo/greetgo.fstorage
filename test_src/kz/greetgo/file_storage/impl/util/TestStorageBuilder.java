@@ -1,10 +1,12 @@
 package kz.greetgo.file_storage.impl.util;
 
 import kz.greetgo.file_storage.FileStorage;
+import kz.greetgo.file_storage.impl.FileStorageBuilder;
+import kz.greetgo.file_storage.impl.FileStorageBuilderConfigurator;
 
 import java.util.function.Function;
 
-public abstract class TestStorageBuilder {
+public abstract class TestStorageBuilder implements FileStorageBuilderConfigurator {
   private boolean mandatoryName = false;
   private boolean mandatoryMimeType = false;
 
@@ -82,6 +84,8 @@ public abstract class TestStorageBuilder {
     return this;
   }
 
+  public abstract FileStorageBuilder getBuilder();
+
   public abstract FileStorage build();
 
   public abstract String implInfo();
@@ -89,5 +93,13 @@ public abstract class TestStorageBuilder {
   @Override
   public String toString() {
     return implInfo();
+  }
+
+  @Override
+  public void configure(FileStorageBuilder builder) {
+    builder.mandatoryName(isMandatoryName());
+    builder.mandatoryMimeType(isMandatoryMimeType());
+    if (mimeTypeValidator != null) builder.mimeTypeValidator(mimeTypeValidator);
+    if (mimeTypeExtractor != null) builder.mimeTypeExtractor(mimeTypeExtractor);
   }
 }

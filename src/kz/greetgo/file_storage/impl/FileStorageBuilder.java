@@ -55,10 +55,10 @@ public interface FileStorageBuilder {
   /**
    * Позволяет настраивать билдер из стороннего обънета
    *
-   * @param consumer сторонний настройщик билдера
+   * @param configurator сторонний настройщик билдера
    * @return ссылка на строителя для продолжения создания хранилища файлов
    */
-  FileStorageBuilder configureFrom(Consumer<FileStorageBuilder> consumer);
+  FileStorageBuilder configureFrom(FileStorageBuilderConfigurator configurator);
 
   /**
    * Заменяет генератор идентификаторов по-умолчанию на другой

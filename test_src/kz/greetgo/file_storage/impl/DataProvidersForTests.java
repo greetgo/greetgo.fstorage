@@ -65,14 +65,17 @@ public class DataProvidersForTests {
 
   private TestStorageBuilder testBuilderForMonoDb(DbType dbType) {
     return new TestStorageBuilder() {
+      FileStorageBuilder builder = FileStorageBuilder.newBuilder();
+
+      @Override
+      public FileStorageBuilder getBuilder() {
+        return builder;
+      }
+
       @Override
       public FileStorage build() {
-        return FileStorageBuilder
-          .newBuilder()
-          .mandatoryName(isMandatoryName())
-          .mandatoryMimeType(isMandatoryMimeType())
-          .mimeTypeValidator(getMimeTypeValidator())
-          .mimeTypeExtractor(getMimeTypeExtractor())
+        return builder
+          .configureFrom(this)
           .inDb(TestUtil.createFrom(dbType, getSchema()))
           .setDataTable(getTable() + "_data")
           .setParamsTable(getTable() + "_param")
@@ -88,14 +91,17 @@ public class DataProvidersForTests {
 
   private TestStorageBuilder testBuilderForMultiDb(DbType dbType) {
     return new TestStorageBuilder() {
+      FileStorageBuilder builder = FileStorageBuilder.newBuilder();
+
+      @Override
+      public FileStorageBuilder getBuilder() {
+        return builder;
+      }
+
       @Override
       public FileStorage build() {
-        return FileStorageBuilder
-          .newBuilder()
-          .mandatoryName(isMandatoryName())
-          .mandatoryMimeType(isMandatoryMimeType())
-          .mimeTypeValidator(getMimeTypeValidator())
-          .mimeTypeExtractor(getMimeTypeExtractor())
+        return builder
+          .configureFrom(this)
           .inMultiDb(dataSourceList(dbType, getSchema(), getDbCount()))
           .setTableName(getTable())
           .build();

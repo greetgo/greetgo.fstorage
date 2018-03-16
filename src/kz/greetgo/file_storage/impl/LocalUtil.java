@@ -30,4 +30,11 @@ public class LocalUtil {
     while (sb.length() < len) sb.insert(0, '0');
     return sb.toString();
   }
+
+  public static String extractExtension(String fileName) {
+    fileName = fileName.trim();
+    int lastIndex = fileName.lastIndexOf('.');
+    if (lastIndex < 0) return null;
+    return fileName.substring(lastIndex + 1).toLowerCase();
+  }
 }
