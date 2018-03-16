@@ -71,6 +71,8 @@ public class DataProvidersForTests {
           .newBuilder()
           .mandatoryName(isMandatoryName())
           .mandatoryMimeType(isMandatoryMimeType())
+          .mimeTypeValidator(getMimeTypeValidator())
+          .mimeTypeExtractor(getMimeTypeExtractor())
           .inDb(TestUtil.createFrom(dbType, getSchema()))
           .setDataTable(getTable() + "_data")
           .setParamsTable(getTable() + "_param")
@@ -92,6 +94,8 @@ public class DataProvidersForTests {
           .newBuilder()
           .mandatoryName(isMandatoryName())
           .mandatoryMimeType(isMandatoryMimeType())
+          .mimeTypeValidator(getMimeTypeValidator())
+          .mimeTypeExtractor(getMimeTypeExtractor())
           .inMultiDb(dataSourceList(dbType, getSchema(), getDbCount()))
           .setTableName(getTable())
           .build();

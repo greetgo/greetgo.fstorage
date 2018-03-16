@@ -2,9 +2,33 @@ package kz.greetgo.file_storage.impl.util;
 
 import kz.greetgo.file_storage.FileStorage;
 
+import java.util.function.Function;
+
 public abstract class TestStorageBuilder {
   private boolean mandatoryName = false;
   private boolean mandatoryMimeType = false;
+
+  private Function<String, Boolean> mimeTypeValidator = null;
+
+  public TestStorageBuilder setMimeTypeValidator(Function<String, Boolean> mimeTypeValidator) {
+    this.mimeTypeValidator = mimeTypeValidator;
+    return this;
+  }
+
+  private Function<String, String> mimeTypeExtractor = null;
+
+  public TestStorageBuilder setMimeTypeExtractor(Function<String, String> mimeTypeExtractor) {
+    this.mimeTypeExtractor = mimeTypeExtractor;
+    return this;
+  }
+
+  public Function<String, String> getMimeTypeExtractor() {
+    return mimeTypeExtractor;
+  }
+
+  public Function<String, Boolean> getMimeTypeValidator() {
+    return mimeTypeValidator;
+  }
 
   public TestStorageBuilder setNameMandatory(boolean mandatoryName) {
     this.mandatoryName = mandatoryName;
@@ -26,11 +50,13 @@ public abstract class TestStorageBuilder {
 
   private String table = "fs2", schema = "t1";
 
+  @SuppressWarnings("unused")
   public TestStorageBuilder setTable(String table) {
     this.table = table;
     return this;
   }
 
+  @SuppressWarnings("unused")
   public TestStorageBuilder setSchema(String schema) {
     this.schema = schema;
     return this;
@@ -50,6 +76,7 @@ public abstract class TestStorageBuilder {
     return dbCount;
   }
 
+  @SuppressWarnings("unused")
   public TestStorageBuilder setDbCount(int dbCount) {
     this.dbCount = dbCount;
     return this;
@@ -61,6 +88,6 @@ public abstract class TestStorageBuilder {
 
   @Override
   public String toString() {
-    return implInfo() + ", " + table + "." + schema;
+    return implInfo();
   }
 }

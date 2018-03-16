@@ -6,8 +6,10 @@ import kz.greetgo.file_storage.FileStorage;
 import kz.greetgo.file_storage.errors.NoFileMimeType;
 import kz.greetgo.file_storage.errors.NoFileName;
 import kz.greetgo.file_storage.errors.StorageTypeAlreadySelected;
+import kz.greetgo.file_storage.errors.UnknownMimeType;
 import kz.greetgo.file_storage.impl.util.RND;
 import kz.greetgo.file_storage.impl.util.TestStorageBuilder;
+import org.fest.assertions.api.Assertions;
 import org.testng.annotations.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -72,8 +74,56 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
   public void checkMimeTypeMandatory(TestStorageBuilder builder) {
     FileStorage fileStorage = builder.setMimeTypeMandatory(true).build();
 
-    String fileId = fileStorage.storing().data(RND.byteArray(5)).store();
+    fileStorage.storing().data(RND.byteArray(5)).store();
+  }
 
-    assertThat(fileId).isNotNull();
+  @Test(dataProvider = "testStorageBuilder_DP", expectedExceptions = UnknownMimeType.class)
+  public void checkMimeTypeValidator_hasLeftMimeType(TestStorageBuilder builder) throws Exception {
+    FileStorage fileStorage = builder
+      .setMimeTypeValidator(mimeType -> false)
+      .build();
+
+    fileStorage.storing().data(RND.byteArray(5)).mimeType("wow").store();
+  }
+
+  @Test(dataProvider = "testStorageBuilder_DP", expectedExceptions = UnknownMimeType.class)
+  public void checkMimeTypeValidator_noMimeType(TestStorageBuilder builder) throws Exception {
+    FileStorage fileStorage = builder
+      .setMimeTypeValidator(mimeType -> false)
+      .build();
+
+    fileStorage.storing().data(RND.byteArray(5)).store();
+  }
+
+  @Test(dataProvider = "testStorageBuilder_DP")
+  public void checkMimeTypeValidator_validatorThrows(TestStorageBuilder builder) throws Exception {
+    FileStorage fileStorage = builder
+      .setMimeTypeValidator(mimeType -> {throw new RuntimeException("Ka ra bas");})
+      .build();
+
+    try {
+      fileStorage.storing().data(RND.byteArray(5)).mimeType("wow").store();
+      Assertions.fail("validator does not works");
+    } catch (UnknownMimeType e) {
+      assertThat(e.getCause().getMessage()).isEqualTo("Ka ra bas");
+    }
+  }
+
+  @Test(dataProvider = "testStorageBuilder_DP")
+  public void checkMimeTypeExtractor(TestStorageBuilder builder) throws Exception {
+    FileStorage fileStorage = builder
+      .setMimeTypeExtractor(fileName -> fileName.substring(0, 5))
+      .build();
+
+    String content = "Привет " + RND.str(10);
+    String name = RND.str(10);
+
+    String fileId = fileStorage.storing()
+      .data(content.getBytes(StandardCharsets.UTF_8))
+      .name(name)
+      .store();
+
+    FileDataReader reader = fileStorage.read(fileId);
+    assertThat(reader.mimeType()).isEqualTo(name.substring(0, 5));
   }
 }

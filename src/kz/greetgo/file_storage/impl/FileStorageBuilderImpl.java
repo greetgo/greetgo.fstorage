@@ -9,6 +9,7 @@ import kz.greetgo.file_storage.errors.UnknownMimeType;
 import javax.sql.DataSource;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -84,10 +85,22 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
     return this;
   }
 
+  Function<String, String> mimeTypeExtractor = null;
+
+  @Override
+  public FileStorageBuilder mimeTypeExtractor(Function<String, String> mimeTypeExtractor) {
+    this.mimeTypeExtractor = mimeTypeExtractor;
+    return this;
+  }
+
+  @Override
+  public FileStorageBuilder configureFrom(Consumer<FileStorageBuilder> consumer) {
+    consumer.accept(this);
+    return this;
+  }
+
   void checkMimeType(String mimeType) {
-    boolean nullOrEmpty = nullOrEmpty(mimeType);
-    if (mandatoryMimeType && nullOrEmpty) throw new NoFileMimeType();
-    if (nullOrEmpty) return;
+    if (mandatoryMimeType && nullOrEmpty(mimeType)) throw new NoFileMimeType();
     if (mimeTypeValidator == null) return;
 
     try {

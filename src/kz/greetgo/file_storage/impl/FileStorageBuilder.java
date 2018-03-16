@@ -2,6 +2,7 @@ package kz.greetgo.file_storage.impl;
 
 import javax.sql.DataSource;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -42,6 +43,22 @@ public interface FileStorageBuilder {
    * @return ссылка на строителя для продолжения создания хранилища файлов
    */
   FileStorageBuilder mimeTypeValidator(Function<String, Boolean> validator);
+
+  /**
+   * Устанавливет вычислитель MimeType по имени файла. Срабатывает при установке имени файла
+   *
+   * @param mimeTypeExtractor вычислитель MimeType по имени файла, или <code>null</code>, если вычислитель не нужен.
+   * @return ссылка на строителя для продолжения создания хранилища файлов
+   */
+  FileStorageBuilder mimeTypeExtractor(Function<String, String> mimeTypeExtractor);
+
+  /**
+   * Позволяет настраивать билдер из стороннего обънета
+   *
+   * @param consumer сторонний настройщик билдера
+   * @return ссылка на строителя для продолжения создания хранилища файлов
+   */
+  FileStorageBuilder configureFrom(Consumer<FileStorageBuilder> consumer);
 
   /**
    * Заменяет генератор идентификаторов по-умолчанию на другой

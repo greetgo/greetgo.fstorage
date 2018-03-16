@@ -8,6 +8,7 @@ import kz.greetgo.file_storage.errors.NoFileWithId;
 
 import java.io.InputStream;
 import java.util.Date;
+import java.util.function.Function;
 
 public class FileStorageMonoDbLogic implements FileStorage {
 
@@ -27,6 +28,14 @@ public class FileStorageMonoDbLogic implements FileStorage {
       @Override
       public FileStoringOperation name(String name) {
         params.name = name;
+
+        {
+          Function<String, String> mimeTypeExtractor = builder.mimeTypeExtractor;
+          if (mimeTypeExtractor != null) {
+            params.mimeType = mimeTypeExtractor.apply(name);
+          }
+        }
+
         return this;
       }
 

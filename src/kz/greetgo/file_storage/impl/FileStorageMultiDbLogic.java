@@ -14,6 +14,7 @@ import kz.greetgo.file_storage.impl.jdbc.structure.Table;
 import javax.sql.DataSource;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.function.Function;
 
 import static kz.greetgo.file_storage.impl.LocalUtil.readAll;
 
@@ -38,6 +39,14 @@ public class FileStorageMultiDbLogic implements FileStorage {
       @Override
       public FileStoringOperation name(String name) {
         params.name = name;
+
+        {
+          Function<String, String> mimeTypeExtractor = parent.mimeTypeExtractor;
+          if (mimeTypeExtractor != null) {
+            params.mimeType = mimeTypeExtractor.apply(name);
+          }
+        }
+
         return this;
       }
 
