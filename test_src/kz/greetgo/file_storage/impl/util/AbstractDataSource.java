@@ -14,12 +14,12 @@ public abstract class AbstractDataSource implements DataSource {
   }
 
   @Override
-  public <T> T unwrap(Class<T> iface) throws SQLException {
+  public <T> T unwrap(Class<T> anInterface) throws SQLException {
     return null;
   }
 
   @Override
-  public boolean isWrapperFor(Class<?> iface) throws SQLException {
+  public boolean isWrapperFor(Class<?> anInterface) throws SQLException {
     return false;
   }
 

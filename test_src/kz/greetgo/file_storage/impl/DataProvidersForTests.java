@@ -1,10 +1,12 @@
 package kz.greetgo.file_storage.impl;
 
 import kz.greetgo.db.DbType;
+import kz.greetgo.file_storage.FileStorage;
 import kz.greetgo.file_storage.impl.logging.FileStorageLogger;
 import kz.greetgo.file_storage.impl.logging.SqlLogger;
 import kz.greetgo.file_storage.impl.logging.events.FileStorageLoggerErrorEvent;
 import kz.greetgo.file_storage.impl.logging.events.FileStorageLoggerEvent;
+import kz.greetgo.file_storage.impl.util.TestStorageBuilder;
 import kz.greetgo.file_storage.impl.util.TestUtil;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -61,45 +63,54 @@ public class DataProvidersForTests {
     return ret;
   }
 
-  @SuppressWarnings("SameParameterValue")
-  private FileStorageCreator dbFileStorage(DbType dbType, String schema, String tableNamePrefix, boolean nameMandatory) {
-    return () -> FileStorageBuilder
-      .newBuilder()
-      .mandatoryName(nameMandatory)
-      .inDb(TestUtil.createFrom(dbType, schema))
-      .setDataTable(tableNamePrefix + "_data")
-      .setParamsTable(tableNamePrefix + "_param")
-      .build();
+  private TestStorageBuilder testBuilderForMonoDb(DbType dbType) {
+    return new TestStorageBuilder() {
+      @Override
+      public FileStorage build() {
+        return FileStorageBuilder
+          .newBuilder()
+          .mandatoryName(isMandatoryName())
+          .mandatoryMimeType(isMandatoryMimeType())
+          .inDb(TestUtil.createFrom(dbType, getSchema()))
+          .setDataTable(getTable() + "_data")
+          .setParamsTable(getTable() + "_param")
+          .build();
+      }
+
+      @Override
+      public String implInfo() {
+        return "MonoDb, " + dbType;
+      }
+    };
   }
 
-  @SuppressWarnings("SameParameterValue")
-  private FileStorageCreator multiDbFileStorage(DbType dbType, String schema, int dbCount,
-                                                String tableName, boolean nameMandatory) {
-    return () -> FileStorageBuilder
-      .newBuilder()
-      .mandatoryName(nameMandatory)
-      .inMultiDb(dataSourceList(dbType, schema, dbCount))
-      .setTableName(tableName)
-      .build();
-  }
+  private TestStorageBuilder testBuilderForMultiDb(DbType dbType) {
+    return new TestStorageBuilder() {
+      @Override
+      public FileStorage build() {
+        return FileStorageBuilder
+          .newBuilder()
+          .mandatoryName(isMandatoryName())
+          .mandatoryMimeType(isMandatoryMimeType())
+          .inMultiDb(dataSourceList(dbType, getSchema(), getDbCount()))
+          .setTableName(getTable())
+          .build();
+      }
 
-  @DataProvider
-  public Object[][] fileStorageWithNameMandatory() {
-    return new Object[][]{
-      {dbFileStorage(DbType.Postgres, "fs2", "t1", true)},
-      {dbFileStorage(DbType.Oracle, "fs2", "t1", true)},
-      {multiDbFileStorage(DbType.Postgres, "fs2", 4, "t1", true)},
-      {multiDbFileStorage(DbType.Oracle, "fs2", 4, "t1", true)},
+      @Override
+      public String implInfo() {
+        return "MultiDb " + getDbCount() + ", " + dbType;
+      }
     };
   }
 
   @DataProvider
-  public Object[][] fileStorageWithNameNotMandatory() {
+  public Object[][] testStorageBuilder_DP() {
     return new Object[][]{
-      {dbFileStorage(DbType.Postgres, "fs2", "t1", false)},
-      {dbFileStorage(DbType.Oracle, "fs2", "t1", false)},
-      {multiDbFileStorage(DbType.Postgres, "fs2", 4, "t1", false)},
-      {multiDbFileStorage(DbType.Oracle, "fs2", 4, "t1", false)},
+      {testBuilderForMonoDb(DbType.Postgres)},
+      {testBuilderForMonoDb(DbType.Oracle)},
+      {testBuilderForMultiDb(DbType.Postgres)},
+      {testBuilderForMultiDb(DbType.Oracle)},
     };
   }
 }

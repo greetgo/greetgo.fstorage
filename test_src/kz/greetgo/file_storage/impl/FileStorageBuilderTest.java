@@ -3,9 +3,11 @@ package kz.greetgo.file_storage.impl;
 import kz.greetgo.db.DbType;
 import kz.greetgo.file_storage.FileDataReader;
 import kz.greetgo.file_storage.FileStorage;
+import kz.greetgo.file_storage.errors.NoFileMimeType;
 import kz.greetgo.file_storage.errors.NoFileName;
 import kz.greetgo.file_storage.errors.StorageTypeAlreadySelected;
 import kz.greetgo.file_storage.impl.util.RND;
+import kz.greetgo.file_storage.impl.util.TestStorageBuilder;
 import org.testng.annotations.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -38,18 +40,18 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
     builder.inDb(createFrom(DbType.Postgres, "fs2"));
   }
 
-  @Test(dataProvider = "fileStorageWithNameMandatory", expectedExceptions = NoFileName.class)
-  public void checkNameMandatory(FileStorageCreator getter) {
-    FileStorage fileStorage = getter.create();
+  @Test(expectedExceptions = NoFileName.class, dataProvider = "testStorageBuilder_DP")
+  public void checkNameMandatory(TestStorageBuilder builder) {
+    FileStorage fileStorage = builder.setNameMandatory(true).build();
 
     String fileId = fileStorage.storing().data(RND.byteArray(5)).store();
 
     assertThat(fileId).isNotNull();
   }
 
-  @Test(dataProvider = "fileStorageWithNameNotMandatory")
-  public void checkNameNotMandatory(FileStorageCreator getter) {
-    FileStorage fileStorage = getter.create();
+  @Test(dataProvider = "testStorageBuilder_DP")
+  public void checkNameNotMandatory(TestStorageBuilder builder) {
+    FileStorage fileStorage = builder.build();
 
     String content = "Привет " + RND.str(500);
     String fileId = fileStorage.storing()
@@ -64,5 +66,14 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
     assertThat(reader.id()).isEqualTo(fileId);
     assertThat(new String(reader.dataAsArray(), StandardCharsets.UTF_8)).isEqualTo(content);
     assertThat(reader.name()).isNull();
+  }
+
+  @Test(expectedExceptions = NoFileMimeType.class, dataProvider = "testStorageBuilder_DP")
+  public void checkMimeTypeMandatory(TestStorageBuilder builder) {
+    FileStorage fileStorage = builder.setMimeTypeMandatory(true).build();
+
+    String fileId = fileStorage.storing().data(RND.byteArray(5)).store();
+
+    assertThat(fileId).isNotNull();
   }
 }
