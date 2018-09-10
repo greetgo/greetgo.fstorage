@@ -35,3 +35,22 @@ public class Examples {
   }
 }
 ```
+
+You can also store files in different databases, if files too many, like following:
+
+```java
+public class Examples {
+  public static void main(String[] args) {
+    DataSource dataSource1 = getCoolDataSource1();
+    DataSource dataSource2 = getCoolDataSource2();
+    DataSource dataSource3 = getCoolDataSource3();
+
+    FileStorage fileStorage = FileStorageBuilder
+      .newBuilder()
+      .inMultiDb(Arrays.asList(dataSource1, dataSource2, dataSource3))
+      .build();
+    
+    //At now you can work with fileStorage...
+  }
+}
+```
