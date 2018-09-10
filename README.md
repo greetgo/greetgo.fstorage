@@ -54,3 +54,5 @@ public class Examples {
   }
 }
 ```
+
+FileStorageBuilder can configure many parameters: table name, field names, etc.
