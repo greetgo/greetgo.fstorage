@@ -4,60 +4,62 @@ import java.io.InputStream;
 import java.util.Date;
 
 /**
- * Операция по сохранению файла
+ * File storing operation
  */
 public interface FileStoringOperation {
   /**
-   * Указывает
+   * Specifies file name
    *
-   * @param name имя файла
-   * @return ссылка на проводимую операцию
+   * @param name file name
+   * @return reference to this
    */
   FileStoringOperation name(String name);
 
   /**
-   * Указывает
+   * Defines file last modification time
    *
-   * @param lastModifiedAt дату и время последней модификации
-   * @return ссылка на проводимую операцию
+   * @param lastModifiedAt last modification time
+   * @return reference to this
    */
   FileStoringOperation lastModifiedAt(Date lastModifiedAt);
 
   /**
-   * Указывает
-   * @param mimeType тип данных MIME
-   * @return ссылка на проводимую операцию
+   * Specifies file mime type
+   *
+   * @param mimeType mime type
+   * @return reference to this
    */
   FileStoringOperation mimeType(String mimeType);
 
   /**
-   * Устанавливает контент файла через массив байтов
+   * Defines file content
    *
-   * @param data контент файла
-   * @return ссылка на проводимую операцию
+   * @param data file content
+   * @return reference to this
    */
   FileStoringOperation data(byte[] data);
 
   /**
-   * Устанавливает контент файла через input stream
+   * Defines file content using InputStream
    *
-   * @param inputStream данные для контента файла
-   * @return ссылка на проводимую операцию
+   * @param inputStream input stream for reading file content
+   * @return reference to this
    */
   FileStoringOperation data(InputStream inputStream);
 
   /**
-   * Запуск производимой операции
+   * Reset file id. This id must be absent in DB.
+   * If file with this id already exists, then throws exception, when method {@link #store()} would be called.
    *
-   * @return идентификатор сохранённого файла
-   */
-  String store();
-
-  /**
-   * Устанавливает идентификатор файла. Такого идентификатора в БД не должно быть. Если он есть, то сгенерируется ошибка
-   *
-   * @param presetFileId идентификатор файла
-   * @return ссылка на проводимую операцию
+   * @param presetFileId preset file id
+   * @return reference to this
    */
   FileStoringOperation presetId(String presetFileId);
+
+  /**
+   * Run operation
+   *
+   * @return stored file id
+   */
+  String store();
 }

@@ -6,8 +6,9 @@ import kz.greetgo.file_storage.FileStorage;
 import kz.greetgo.file_storage.impl.util.TestUtil;
 
 import javax.sql.DataSource;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class Examples {
   public static void main(String[] args) {
@@ -50,15 +51,18 @@ public class Examples {
   private void execWith(FileStorage fileStorage) {
     String fileId = fileStorage.storing()
       .name("hello.txt")//MimeType вычисляется по расширению имени
-      .data("Содержимое текстового файла".getBytes(StandardCharsets.UTF_8))
+      .data("Содержимое текстового файла".getBytes(UTF_8))
       .store();
 
     System.out.println("Hello.txt fileId = " + fileId);
 
     FileDataReader reader = fileStorage.read(fileId);
-    System.out.println("name      = "+reader.name());
-    System.out.println("Mime type = "+reader.mimeType());
-    System.out.println("createdAt = "+reader.createdAt());
+    System.out.println("name      = " + reader.name());
+    System.out.println("Mime type = " + reader.mimeType());
+    System.out.println("createdAt = " + reader.createdAt());
+    byte[] dataAsArray = reader.dataAsArray();
+    String data = new String(dataAsArray, UTF_8);
+    System.out.println(data);
   }
 
 }

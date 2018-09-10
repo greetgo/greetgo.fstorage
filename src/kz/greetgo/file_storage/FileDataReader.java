@@ -3,41 +3,41 @@ package kz.greetgo.file_storage;
 import java.util.Date;
 
 /**
- * Читатель данных файла
+ * Reader of data from file
  */
 public interface FileDataReader {
   /**
-   * Читает
+   * Reads file name
    *
-   * @return имя файла
+   * @return file name
    */
   String name();
 
   /**
-   * Читает
+   * Reads file content as byte array
    *
-   * @return содержимое файла, как массив байт
+   * @return file content as byte array
    */
   byte[] dataAsArray();
 
   /**
-   * Читает
+   * Reads file creation date-time
    *
-   * @return дату и время создания файла
+   * @return file creation date-time
    */
   Date createdAt();
 
   /**
-   * Читает
+   * Reads file mime type
    *
-   * @return MIME-тип содержимого файла
+   * @return file mime type
    */
   String mimeType();
 
   /**
-   * Читает
+   * Reads file id
    *
-   * @return идентификатор файла
+   * @return file id
    */
   String id();
 }

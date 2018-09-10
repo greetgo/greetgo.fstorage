@@ -3,31 +3,31 @@ package kz.greetgo.file_storage;
 import kz.greetgo.file_storage.errors.NoFileWithId;
 
 /**
- * Хранилище файлов
+ * File Storage interface
  */
 public interface FileStorage {
 
   /**
-   * Начинает сохранение нового файла
+   * Creates new operation for storing new file
    *
-   * @return сохранитель нового файла
+   * @return operation for storing new file
    */
   FileStoringOperation storing();
 
   /**
-   * Чтение файла по идентификатору
+   * Reads file by id
    *
-   * @param fileId идентификатор читаемого файла
-   * @return читатель данных файла
-   * @throws NoFileWithId выбрасывается, если не найден файл с указанным идентификатором
+   * @param fileId reading file id
+   * @return file data reader
+   * @throws NoFileWithId throws when file with specified id is absent
    */
   FileDataReader read(String fileId) throws NoFileWithId;
 
   /**
-   * Чтение файла по идентификатору
+   * Reads file by id without throwing
    *
-   * @param fileId идентификатор читаемого файла
-   * @return читатель данных файла
+   * @param fileId reading file id
+   * @return file data reader or <code>null</code>, if specified file id is absent
    */
   FileDataReader readOrNull(String fileId);
 }
