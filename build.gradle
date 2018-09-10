@@ -1,3 +1,8 @@
+plugins {
+  id "kz.greetgo.upload-to-maven" version "0.0.5"
+  id "kz.greetgo.upload-to-gg-repo" version "0.0.5"
+}
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven'
@@ -8,57 +13,14 @@ group = 'kz.greetgo'
 sourceCompatibility = 1.8
 version = '2.0.0'
 
-def nowDate = new Date()
-def nowFormattedDate = nowDate.format("yyyy-MM-dd/HH:mm:ss")
-
-jar {
-  manifest {
-    attributes 'Implementation-Title': project.name
-    attributes 'Implementation-Version': version
-    attributes 'Implementation-Vendor': 'greetgo!'
-    attributes 'Built-By': System.getProperty("user.name")
-    attributes 'Built-At': nowFormattedDate
-  }
-}
-
-eclipse.project.natures 'org.springsource.ide.eclipse.gradle.core.nature'
-
-compileJava.options.encoding = 'UTF-8'
-compileTestJava.options.encoding = 'UTF-8'
-
-sourceSets.main.java.srcDirs = ["src"]
-sourceSets.main.resources.srcDirs = ["src", "src_resources"]
-sourceSets.test.java.srcDirs = ["test_src"]
-sourceSets.test.resources.srcDirs = ["test_src", "test_resources"]
-
-eclipse {
-  jdt {
-    //
-    // if you want to alter the java versions (by default they are configured with
-    // gradle java plugin settings):
-    //
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-  }
-}
-
-project.eclipse.classpath.file.whenMerged { cp ->
-  if (project.hasProperty("sourceCompatibility")) {
-    cp.entries.findAll { it.path.contains('JRE_CONTAINER') }.each {
-
-      it.path += "/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/" +
-        "JavaSE-$project.sourceCompatibility"
-    }
-  }
-}
-
 repositories {
-  maven { url System.getenv('GG_REPO') }
+  mavenLocal()
+  if (System.getenv('GG_REPO')?.trim()) maven { url System.getenv('GG_REPO') }
+  mavenCentral()
 }
 
 dependencies {
 
-//  testCompile 'kz.greetgo:greetgo.util:0.0.6'
   testCompile group: 'kz.greetgo.db', name: 'greetgo.db', version: '2.0.0'
 
   testCompile group: 'kz.greetgo.conf', name: 'greetgo.conf', version: '1.0.0'
@@ -69,40 +31,59 @@ dependencies {
   testCompile 'org.testng:testng:6.5.1'
   testCompile 'org.easytesting:fest-assert-core:2.0M10'
 
-  testCompile 'postgresql:postgresql:9.1-901.jdbc4'
   testCompile group: 'org.apache.commons', name: 'commons-dbcp2', version: '2.1.1'
 
-  testCompile "greetgo.3rd-party:oracle-ojdbc6_g:11.2.0.3"
-  testCompile "greetgo.3rd-party:oracle-ucp:11.2.0.3"
+  if (System.getenv('GG_REPO')?.trim()) {
+    testCompile "greetgo.3rd-party:oracle-ojdbc6_g:11.2.0.3"
+    testCompile "greetgo.3rd-party:oracle-ucp:11.2.0.3"
+  } else {
+    testCompile fileTree(dir: 'oracle_driver_jars', include: '*.jar')
+  }
+
 }
 
-test { useTestNG() }
+test.useTestNG()
 
-task javadocJar(type: Jar, dependsOn: 'javadoc') {
-  from javadoc.destinationDir
-  classifier = 'javadoc'
+idea.module.inheritOutputDirs = false
+idea.module.outputDir = file("$buildDir/classes/main/")
+idea.module.testOutputDir = file("$buildDir/classes/test/")
+
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+[compileJava, compileTestJava]*.options*.debugOptions*.debugLevel = "source,lines,vars"
+
+sourceSets.main.java.srcDirs = ["src"]
+sourceSets.test.java.srcDirs = ["test_src"]
+sourceSets.main.resources.srcDirs = ["src_resources"]
+sourceSets.test.resources.srcDirs = ["test_resources"]
+
+sourceSets.main.resources {
+  srcDirs += sourceSets.main.java.srcDirs
+  exclude '**/*.java'
+}
+sourceSets.test.resources {
+  srcDirs += sourceSets.test.java.srcDirs
+  exclude '**/*.java'
 }
 
-task sourcesJar(type: Jar) {
-  from sourceSets.main.allSource
-  classifier = 'sources'
+jar {
+  manifest {
+    attributes 'Implementation-Title': project.name
+    attributes 'Implementation-Version': version
+    attributes 'Implementation-Vendor': "greetgo!"
+    attributes 'Created-By': System.getProperty("user.name")
+    attributes 'Created-At': new Date().format("yyyy-MM-dd/HH:mm:ss")
+  }
 }
 
-artifacts {
-  archives javadocJar
-  archives sourcesJar
-}
-
-uploadArchives {
-  repositories.mavenDeployer {
-    configuration = configurations.archives
-    repository(
-      url: System.getenv('GG_REPO')
-    )
-
-    pom.project {
-      name project.name
-      packaging 'jar'
-    }
+uploadToMavenCentral {
+  description = 'File Storage Implementation'
+  url = 'https://tech.greetgo.kz/test_project.php'
+  scm {
+    url = 'https://github.com/greetgo/fstorage.git'
+  }
+  developer {
+    id = 'pompei'
+    name = 'Evgenij Kolpakov'
+    email = 'ekolpakov@greet-go.com'
   }
 }
