@@ -17,7 +17,7 @@ import java.util.List;
 
 public class DataProvidersForTests {
   @BeforeMethod
-  public void setNewSqlLogger_to_FileStorageLogger() throws Exception {
+  public void setNewSqlLogger_to_FileStorageLogger() {
     FileStorageLogger.setNewSqlLogger(new SqlLogger() {
       @Override
       public boolean isTraceEnabled() {
@@ -31,7 +31,7 @@ public class DataProvidersForTests {
 
       @Override
       public void error(FileStorageLoggerErrorEvent event) {
-        if (traceSql()) System.out.println(event);
+        if (traceSql()) { System.out.println(event); }
       }
     });
   }

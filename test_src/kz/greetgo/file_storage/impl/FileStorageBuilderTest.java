@@ -25,7 +25,7 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
   }
 
   @Test(expectedExceptions = StorageTypeAlreadySelected.class)
-  public void inDb_inMultiDb_1() throws Exception {
+  public void inDb_inMultiDb_1() {
     createFrom(DbType.Postgres, "fs2");
     FileStorageBuilder builder = FileStorageBuilder.newBuilder();
     builder.mandatoryName(true);
@@ -34,7 +34,7 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
   }
 
   @Test(expectedExceptions = StorageTypeAlreadySelected.class)
-  public void inDb_inMultiDb_2() throws Exception {
+  public void inDb_inMultiDb_2() {
     createFrom(DbType.Postgres, "fs2");
     FileStorageBuilder builder = FileStorageBuilder.newBuilder();
     builder.mandatoryName(true);
@@ -78,7 +78,7 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "testStorageBuilder_DP", expectedExceptions = UnknownMimeType.class)
-  public void checkMimeTypeValidator_hasLeftMimeType(TestStorageBuilder builder) throws Exception {
+  public void checkMimeTypeValidator_hasLeftMimeType(TestStorageBuilder builder) {
     FileStorage fileStorage = builder
       .setMimeTypeValidator(mimeType -> false)
       .build();
@@ -87,7 +87,7 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "testStorageBuilder_DP", expectedExceptions = UnknownMimeType.class)
-  public void checkMimeTypeValidator_noMimeType(TestStorageBuilder builder) throws Exception {
+  public void checkMimeTypeValidator_noMimeType(TestStorageBuilder builder) {
     FileStorage fileStorage = builder
       .setMimeTypeValidator(mimeType -> false)
       .build();
@@ -96,7 +96,7 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "testStorageBuilder_DP")
-  public void checkMimeTypeValidator_validatorThrows(TestStorageBuilder builder) throws Exception {
+  public void checkMimeTypeValidator_validatorThrows(TestStorageBuilder builder) {
     FileStorage fileStorage = builder
       .setMimeTypeValidator(mimeType -> {throw new RuntimeException("Ka ra bas");})
       .build();
@@ -110,7 +110,7 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "testStorageBuilder_DP")
-  public void checkMimeTypeExtractor(TestStorageBuilder builder) throws Exception {
+  public void checkMimeTypeExtractor(TestStorageBuilder builder) {
     FileStorage fileStorage = builder
       .setMimeTypeExtractor(fileName -> fileName.substring(0, 5))
       .build();
@@ -128,7 +128,7 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "testStorageBuilder_DP")
-  public void probeMimeTypeBaseConfigurator_existsExtension(TestStorageBuilder builder) throws Exception {
+  public void probeMimeTypeBaseConfigurator_existsExtension(TestStorageBuilder builder) {
     MimeTypeBaseConfigurator.get().configure(builder.getBuilder());
 
     FileStorage fileStorage = builder.build();
@@ -146,7 +146,7 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "testStorageBuilder_DP")
-  public void probeMimeTypeBaseConfigurator_leftExtension(TestStorageBuilder builder) throws Exception {
+  public void probeMimeTypeBaseConfigurator_leftExtension(TestStorageBuilder builder) {
     MimeTypeBaseConfigurator.get().configure(builder.getBuilder());
 
     FileStorage fileStorage = builder.build();

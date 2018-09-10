@@ -34,7 +34,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void store_read(DbType dbType) throws Exception {
+  public void store_read(DbType dbType) {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
@@ -88,7 +88,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(expectedExceptions = NoFileWithId.class, dataProvider = "dbTypeDataProvider")
-  public void noId_immediately(DbType dbType) throws Exception {
+  public void noId_immediately(DbType dbType) {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
@@ -104,7 +104,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(expectedExceptions = NoFileWithId.class, dataProvider = "dbTypeDataProvider")
-  public void noId(DbType dbType) throws Exception {
+  public void noId(DbType dbType) {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
@@ -120,7 +120,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void readOrNull_noId_null(DbType dbType) throws Exception {
+  public void readOrNull_noId_null(DbType dbType) {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
@@ -137,7 +137,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void externalIdGenerator(DbType dbType) throws Exception {
+  public void externalIdGenerator(DbType dbType) {
     String prefix = RND.str(10);
 
     FileStorage storage = FileStorageBuilder
@@ -163,7 +163,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void bigExternalId(DbType dbType) throws Exception {
+  public void bigExternalId(DbType dbType) {
     String prefix = RND.str(100);
 
     FileStorage storage = FileStorageBuilder
@@ -201,7 +201,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void store_read_presetId(DbType dbType) throws Exception {
+  public void store_read_presetId(DbType dbType) {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
@@ -235,7 +235,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void testFileIdAlreadyExists(DbType dbType) throws Exception {
+  public void testFileIdAlreadyExists(DbType dbType) {
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
@@ -265,7 +265,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void checkMimeTypeWithCustomLength(DbType dbType) throws Exception {
+  public void checkMimeTypeWithCustomLength(DbType dbType) {
     String rnd = RND.intStr(7);
 
     FileStorage storage = FileStorageBuilder
@@ -308,7 +308,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(expectedExceptions = NoFileMimeType.class, dataProvider = "nullAndEmpty")
-  public void checkMimeTypeMandatory(DbType dbType, String nullAndEmpty) throws Exception {
+  public void checkMimeTypeMandatory(DbType dbType, String nullAndEmpty) {
     String rnd = RND.intStr(7);
 
     FileStorage storage = FileStorageBuilder
@@ -331,7 +331,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(expectedExceptions = NoFileName.class, dataProvider = "nullAndEmpty")
-  public void checkNameMandatory(DbType dbType, String nullAndEmpty) throws Exception {
+  public void checkNameMandatory(DbType dbType, String nullAndEmpty) {
     String rnd = RND.intStr(7);
 
     FileStorage storage = FileStorageBuilder
@@ -353,7 +353,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(expectedExceptions = Ora00972_IdentifierIsTooLong.class)
-  public void throw_Ora00972_IdentifierIsTooLong_setDataTable() throws Exception {
+  public void throw_Ora00972_IdentifierIsTooLong_setDataTable() {
     String rnd = RND.intStr(17);
 
     FileStorageBuilder
@@ -364,7 +364,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(expectedExceptions = Ora00972_IdentifierIsTooLong.class)
-  public void throw_Ora00972_IdentifierIsTooLong_setParamsTableMimeType() throws Exception {
+  public void throw_Ora00972_IdentifierIsTooLong_setParamsTableMimeType() {
     String rnd = RND.intStr(17);
 
     FileStorageBuilder
@@ -375,7 +375,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(expectedExceptions = Ora00972_IdentifierIsTooLong.class)
-  public void throw_Ora00972_IdentifierIsTooLong_setParamsTable() throws Exception {
+  public void throw_Ora00972_IdentifierIsTooLong_setParamsTable() {
     String rnd = RND.intStr(17);
 
     FileStorageBuilder
@@ -386,7 +386,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(expectedExceptions = NoFileData.class, dataProvider = "dbTypeDataProvider")
-  public void checkDataMandatory(DbType dbType) throws Exception {
+  public void checkDataMandatory(DbType dbType) {
     String rnd = RND.intStr(7);
 
     FileStorage storage = FileStorageBuilder
@@ -405,7 +405,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
 
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void unknownMimeType(DbType dbType) throws Exception {
+  public void unknownMimeType(DbType dbType) {
     String rnd = RND.intStr(7);
 
     String actualMimeType[] = new String[]{null};
@@ -442,7 +442,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void unknownMimeType_throwsSomeError(DbType dbType) throws Exception {
+  public void unknownMimeType_throwsSomeError(DbType dbType) {
     String rnd = RND.intStr(7);
 
     String actualMimeType[] = new String[]{null};
@@ -481,7 +481,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void unknownMimeType_throwsUnknownMimeType(DbType dbType) throws Exception {
+  public void unknownMimeType_throwsUnknownMimeType(DbType dbType) {
     String rnd = RND.intStr(7);
 
     String actualMimeType[] = new String[]{null};
@@ -520,7 +520,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void checkDefaultValue_dataTable(DbType dbType) throws Exception {
+  public void checkDefaultValue_dataTable(DbType dbType) {
     FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
@@ -529,7 +529,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void checkDefaultValue_dataTableId(DbType dbType) throws Exception {
+  public void checkDefaultValue_dataTableId(DbType dbType) {
     FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
@@ -538,7 +538,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void checkDefaultValue_dataTableData(DbType dbType) throws Exception {
+  public void checkDefaultValue_dataTableData(DbType dbType) {
     FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
@@ -547,7 +547,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void checkDefaultValue_paramsTable(DbType dbType) throws Exception {
+  public void checkDefaultValue_paramsTable(DbType dbType) {
     FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
@@ -556,7 +556,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void checkDefaultValue_paramsTableId(DbType dbType) throws Exception {
+  public void checkDefaultValue_paramsTableId(DbType dbType) {
     FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
@@ -565,7 +565,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void checkDefaultValue_paramsTableDataId(DbType dbType) throws Exception {
+  public void checkDefaultValue_paramsTableDataId(DbType dbType) {
     FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
@@ -574,7 +574,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void checkDefaultValue_paramsTableLastModifiedAt(DbType dbType) throws Exception {
+  public void checkDefaultValue_paramsTableLastModifiedAt(DbType dbType) {
     FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
@@ -583,7 +583,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void checkDefaultValue_paramsTableMimeType(DbType dbType) throws Exception {
+  public void checkDefaultValue_paramsTableMimeType(DbType dbType) {
     FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
@@ -592,7 +592,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void checkDefaultValue_paramsTableMimeTypeLength(DbType dbType) throws Exception {
+  public void checkDefaultValue_paramsTableMimeTypeLength(DbType dbType) {
     FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
@@ -601,7 +601,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void checkDefaultValue_paramsTableName(DbType dbType) throws Exception {
+  public void checkDefaultValue_paramsTableName(DbType dbType) {
     FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
@@ -610,7 +610,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void checkDefaultValue_paramsTableNameLength(DbType dbType) throws Exception {
+  public void checkDefaultValue_paramsTableNameLength(DbType dbType) {
     FileStorageBuilderMonoDb builder = FileStorageBuilder
       .newBuilder()
       .inDb(TestUtil.createFrom(dbType, SCHEMA));

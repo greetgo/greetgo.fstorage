@@ -25,7 +25,7 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void defaultValue_tableIndexLength(DbType dbType) throws Exception {
+  public void defaultValue_tableIndexLength(DbType dbType) {
     FileStorageBuilderMultiDb builder = FileStorageBuilder
       .newBuilder()
       .inMultiDb(dataSourceList(dbType, SCHEMA_PREFIX, 3));
@@ -38,7 +38,7 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void defaultValue_tableName(DbType dbType) throws Exception {
+  public void defaultValue_tableName(DbType dbType)  {
     FileStorageBuilderMultiDb builder = FileStorageBuilder
       .newBuilder()
       .inMultiDb(dataSourceList(dbType, SCHEMA_PREFIX, 3));
@@ -52,7 +52,7 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
 
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void defaultValue_tableCountPerDb(DbType dbType) throws Exception {
+  public void defaultValue_tableCountPerDb(DbType dbType)  {
     FileStorageBuilderMultiDb builder = FileStorageBuilder
       .newBuilder()
       .inMultiDb(dataSourceList(dbType, SCHEMA_PREFIX, 3));
@@ -65,7 +65,7 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void defaultValue_tableDetector(DbType dbType) throws Exception {
+  public void defaultValue_tableDetector(DbType dbType)  {
     FileStorageBuilderMultiDb builder = FileStorageBuilder
       .newBuilder()
       .inMultiDb(dataSourceList(dbType, SCHEMA_PREFIX, 3));
@@ -127,7 +127,7 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
 
     for (int i = 0; i < dataArray.length; i++) {
 
-      if (fileIdArray[i] == null) Assertions.fail("fileIdArray[" + i + "] == null");
+      if (fileIdArray[i] == null) { Assertions.fail("fileIdArray[" + i + "] == null"); }
 
       FileDataReader reader = fileStorage.read(fileIdArray[i]);
       assertThat(reader.id()).isEqualTo(fileIdArray[i]);
@@ -172,8 +172,7 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
     }
 
     {
-      LinkedList<Dot> queue = new LinkedList<>();
-      queue.addAll(list);
+      LinkedList<Dot> queue = new LinkedList<>(list);
 
       List<Thread> threadList = new ArrayList<>();
       for (int i = 0; i < 7; i++) {
@@ -186,7 +185,7 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
               dot = queue.poll();
             }
 
-            if (dot == null) return;
+            if (dot == null) { return; }
             dot.fileId.set(fileStorage.storing()
               .name(dot.name)
               .data(dot.content.getBytes(StandardCharsets.UTF_8))
