@@ -10,7 +10,7 @@ You can use the following databases:
    - Oracle
  - MongoDB
 
-See source of [FileStorage](https://github.com/greetgo/greetgo.fstorage/blob/master/src/kz/greetgo/file_storage/FileStorage.java)
+See source of [kz.greetgo.file_storage.FileStorage](https://github.com/greetgo/greetgo.fstorage/blob/master/src/kz/greetgo/file_storage/FileStorage.java)
 
 ## Single relational database usage
 
@@ -19,7 +19,7 @@ public class FileStorageFactory {
   public static FileStorage getFileStorage() {
     javax.sql.DataSource dataSource = getCoolDataSource();
     
-    FileStorage fileStorage = FileStorageBuilder
+    kz.greetgo.file_storage.FileStorage fileStorage = FileStorageBuilder
       .newBuilder()
       .mandatoryMimeType(true)//make defining mime type mandatory
       .mandatoryName(true)//make defining file name mandatory
@@ -41,7 +41,7 @@ public class FileStorageFactory {
     javax.sql.DataSource dataSource3 = getCoolDataSource(3);
     // any number of data source
     
-    FileStorage fileStorage = FileStorageBuilder
+    kz.greetgo.file_storage.FileStorage fileStorage = FileStorageBuilder
       .newBuilder()
       .mandatoryMimeType(true)//make defining mime type mandatory
       .mandatoryName(true)//make defining file name mandatory
@@ -60,7 +60,7 @@ public class FileStorageFactory {
   public static FileStorage getFileStorage() {
     MongoCollection<Document> collection = getCollectionForFileStorage();
     
-    FileStorage fileStorage = FileStorageBuilder
+    kz.greetgo.file_storage.FileStorage fileStorage = FileStorageBuilder
       .newBuilder()
       .mandatoryMimeType(true)//make defining mime type mandatory
       .mandatoryName(true)//make defining file name mandatory
