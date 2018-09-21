@@ -11,7 +11,7 @@ apply plugin: 'idea'
 group = 'kz.greetgo'
 
 sourceCompatibility = 1.8
-version = '2.0.0'
+version = '2.0.1'
 
 def ggRepo = System.getenv('GG_REPO')?.trim()
 if (!ggRepo) ggRepo = System.getProperty('GG_REPO')?.trim()
