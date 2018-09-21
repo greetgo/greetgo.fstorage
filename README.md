@@ -16,7 +16,7 @@ See source of [FileStorage](https://github.com/greetgo/greetgo.fstorage/blob/mas
 
 ```java
 public class FileStorageFactory {
-  public static FileStorage getFileStorage(String[] args) {
+  public static FileStorage getFileStorage() {
     javax.sql.DataSource dataSource = getCoolDataSource();
     
     FileStorage fileStorage = FileStorageBuilder
@@ -31,6 +31,49 @@ public class FileStorageFactory {
 }
 ```
 
+## Multiple relational database usage
+
+```java
+public class FileStorageFactory {
+  public static FileStorage getFileStorage() {
+    javax.sql.DataSource dataSource1 = getCoolDataSource(1);
+    javax.sql.DataSource dataSource2 = getCoolDataSource(2);
+    javax.sql.DataSource dataSource3 = getCoolDataSource(3);
+    // any number of data source
+    
+    FileStorage fileStorage = FileStorageBuilder
+      .newBuilder()
+      .mandatoryMimeType(true)//make defining mime type mandatory
+      .mandatoryName(true)//make defining file name mandatory
+      .inMultiDb(Arrays.asList(dataSource1, dataSource2, dataSource3))//define place to store files
+      .build();
+    
+    return fileStorage;
+  }
+}
+```
+
+## MongoDB usage
+
+```java
+public class FileStorageFactory {
+  public static FileStorage getFileStorage() {
+    MongoCollection<Document> collection = getCollectionForFileStorage();
+    
+    FileStorage fileStorage = FileStorageBuilder
+      .newBuilder()
+      .mandatoryMimeType(true)//make defining mime type mandatory
+      .mandatoryName(true)//make defining file name mandatory
+      .inMongodb(collection)//define place to store files
+      .build();
+    
+    return fileStorage;
+  }
+}
+```
+
+FileStorageBuilder can configure many parameters: table name, field names, etc.
+
 ## Examples
 
 ```java
@@ -40,15 +83,7 @@ public class Examples {
   public static void main(String[] args) {
     javax.sql.DataSource dataSource = getCoolDataSource();
     
-    FileStorage fileStorage = FileStorageBuilder
-      .newBuilder()
-      .configureFrom(MimeTypeBaseConfigurator.get())//defines using mime types, you can redefine you want
-      .mandatoryMimeType(true)//make defining mime type mandatory
-      .mandatoryName(true)//make defining file name mandatory
-      .inDb(dataSource)//define place to store files
-      .build();
-    
-    //At now you can add file
+    FileStorage fileStorage = getFileStorage();
     
     String fileId = fileStorage.storing()
           .name("hello.txt")//MimeType calculates by extension
@@ -66,25 +101,3 @@ public class Examples {
   }
 }
 ```
-
-You can also store files in different databases, if files too many, like following:
-
-```java
-public class Examples {
-  public static void main(String[] args) {
-    DataSource dataSource1 = getCoolDataSource1();
-    DataSource dataSource2 = getCoolDataSource2();
-    DataSource dataSource3 = getCoolDataSource3();
-
-    FileStorage fileStorage = FileStorageBuilder
-      .newBuilder()
-      .inMultiDb(Arrays.asList(dataSource1, dataSource2, dataSource3))
-      .build();
-    
-    //At now you can work with fileStorage...
-  }
-}
-```
-
-FileStorageBuilder can configure many parameters: table name, field names, etc.
-
