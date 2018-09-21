@@ -1,5 +1,16 @@
 # File Storage in DB
 
+Using this library you can store files in the databases listed above: store files under fileId
+and get files by fileId.
+
+FileId generates automatically and can be used in browser address bar (F6), or you can specify fileId by yourself.
+
+Also you can store/get file names, fileMimeTypes and createdAt time.
+
+Do it using [kz.greetgo.file_storage.FileStorage](https://github.com/greetgo/greetgo.fstorage/blob/master/src/kz/greetgo/file_storage/FileStorage.java)
+
+There is `kz.greetgo.file_storage.impl.FileStorageBuilder.newBuilder()` to create implementations of FileStorage
+
 You can use the following databases:
 
  - Single relational database
@@ -10,7 +21,23 @@ You can use the following databases:
    - Oracle
  - MongoDB
 
-See source of [kz.greetgo.file_storage.FileStorage](https://github.com/greetgo/greetgo.fstorage/blob/master/src/kz/greetgo/file_storage/FileStorage.java)
+## Installing
+
+In Maven
+
+```xml
+<dependency>
+    <groupId>kz.greetgo</groupId>
+    <artifactId>greetgo.fstorage</artifactId>
+    <version>2.0.1</version>
+</dependency>
+```
+
+In gradle
+
+```groovy
+compile "kz.greetgo:greetgo.fstorage:2.0.1"
+```
 
 ## Single relational database usage
 
