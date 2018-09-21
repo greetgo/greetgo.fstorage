@@ -19,7 +19,9 @@ public class LocalUtil {
 
     while (true) {
       int count = inputStream.read(buffer);
-      if (count < 0) return out.toByteArray();
+      if (count < 0) {
+        return out.toByteArray();
+      }
       out.write(buffer, 0, count);
     }
   }
@@ -27,14 +29,18 @@ public class LocalUtil {
   public static String toStrLen(int value, int len) {
     StringBuilder sb = new StringBuilder(len);
     sb.append(value);
-    while (sb.length() < len) sb.insert(0, '0');
+    while (sb.length() < len) {
+      sb.insert(0, '0');
+    }
     return sb.toString();
   }
 
   public static String extractExtension(String fileName) {
     fileName = fileName.trim();
     int lastIndex = fileName.lastIndexOf('.');
-    if (lastIndex < 0) return null;
+    if (lastIndex < 0) {
+      return null;
+    }
     return fileName.substring(lastIndex + 1).toLowerCase();
   }
 }

@@ -4,7 +4,7 @@ import java.util.Date;
 
 class CreateNewParams {
   String name = null;
-  Date lastModifiedAt = null;
+  Date createdAt = null;
   String presetFileId = null;
   String mimeType = null;
 }

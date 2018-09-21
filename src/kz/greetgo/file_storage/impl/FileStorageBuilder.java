@@ -1,88 +1,101 @@
 package kz.greetgo.file_storage.impl;
 
+import com.mongodb.client.MongoCollection;
+import org.bson.Document;
+
 import javax.sql.DataSource;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * Строитель хранилища файлов
+ * Builder of file storage
  */
 public interface FileStorageBuilder {
 
   /**
-   * Создаёт
+   * Creates a new file store builder
    *
-   * @return новый строитель хранилища файлов
+   * @return the file storage builder
    */
   static FileStorageBuilder newBuilder() {
     return new FileStorageBuilderImpl();
   }
 
   /**
-   * Указывает
+   * Indicates whether the file name is mandatory
    *
-   * @param mandatoryName необходимость обязательного определения имени файла
-   * @return ссылка на строителя для продолжения создания хранилища файлов
+   * @param mandatoryName <code>true</code> - file name is mandatory, otherwise - optional
+   * @return reference to this builder
    */
   FileStorageBuilder mandatoryName(boolean mandatoryName);
 
   /**
-   * Указывает
+   * Indicates whether the file MIME-type is mandatory
    *
-   * @param mandatoryMimeType необходимость обязательного определения MIME-типа файла
-   * @return ссылка на строителя для продолжения создания хранилища файлов
+   * @param mandatoryMimeType <code>true</code> - file MIME-type is mandatory, otherwise - optional
+   * @return reference to this builder
    */
   FileStorageBuilder mandatoryMimeType(boolean mandatoryMimeType);
 
   /**
-   * Устанавливает
+   * Sets MIME-type validator function
    *
-   * @param validator проверщик корректности mimeType
-   * @return ссылка на строителя для продолжения создания хранилища файлов
+   * @param validator MIME-type validator function.
+   *                  The function gets a type and returns a correctness criterion of this type:
+   *                  if function returns <code>true</code>, then validation OK, otherwise - exception would be thrown
+   * @return reference to this builder
    */
   FileStorageBuilder mimeTypeValidator(Function<String, Boolean> validator);
 
   /**
-   * Устанавливет вычислитель MimeType по имени файла. Срабатывает при установке имени файла
+   * Sets the MimeType calculator by file name. Handles when setting the file name.
    *
-   * @param mimeTypeExtractor вычислитель MimeType по имени файла, или <code>null</code>, если вычислитель не нужен.
-   * @return ссылка на строителя для продолжения создания хранилища файлов
+   * @param mimeTypeExtractor MimeType calculator by file name or <code>null</code>, if calculator is not needed
+   * @return reference to this builder
    */
+  @SuppressWarnings("UnusedReturnValue")
   FileStorageBuilder mimeTypeExtractor(Function<String, String> mimeTypeExtractor);
 
   /**
-   * Позволяет настраивать билдер из стороннего обънета
+   * Allows you to configure the builder from a third-party object
    *
-   * @param configurator сторонний настройщик билдера
-   * @return ссылка на строителя для продолжения создания хранилища файлов
+   * @param configurator the third-party object to configure builder
+   * @return reference to this builder
    */
   FileStorageBuilder configureFrom(FileStorageBuilderConfigurator configurator);
 
   /**
-   * Заменяет генератор идентификаторов по-умолчанию на другой
+   * Replaces the identifier generator with another one
    *
-   * @param idGenerator другой генератор иднетификаторов
-   * @param idLength    максимальная длинна в символах, генерируемых идентификаторов
-   * @return ссылка на строителя для продолжения создания хранилища файлов
+   * @param idGenerator another the identifier generator
+   * @param idLength    the maximum length in characters, generated identifiers
+   * @return reference to this builder
    */
   FileStorageBuilder setIdGenerator(int idLength, Supplier<String> idGenerator);
 
   /**
-   * Указывает хранение файлов в одной реляционной БД
+   * Switches to the builder, which stores files in one relational database
    *
-   * @param dataSource источник конектов к БД, чтобы создать хнанителя файлов в БД
-   * @return ссылка на строителя для продолжения создания хранилища файлов
+   * @param dataSource {@link DataSource} where files are storing
+   * @return reference to new builder
    */
   FileStorageBuilderMonoDb inDb(DataSource dataSource);
 
   /**
-   * Указывает хранение файлов в нескольких реляционных БД
+   * Switches to the builder, which will store files in several relational databases
    *
-   * @param dataSourceList список источников коннектов к релационным БД. Порядок в списке очень важет, так как данные
-   *                       шардируются
-   * @return ссылка на строителя для продолжения создания хранилища файлов
+   * @param dataSourceList List of DataSources to relational databases. The order in the list
+   *                       is very important, since the data is sharding
+   * @return reference to new builder
    */
   FileStorageBuilderMultiDb inMultiDb(List<DataSource> dataSourceList);
+
+  /**
+   * Switches to the builder, which will store files in MongoDB
+   *
+   * @param collection a mongodb collection to storing files
+   * @return reference to new builder
+   */
+  FileStorageBuilderInMongodb inMongodb(MongoCollection<Document> collection);
 }

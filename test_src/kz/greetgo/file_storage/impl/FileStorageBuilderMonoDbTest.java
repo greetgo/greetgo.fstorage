@@ -49,7 +49,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
     //
     String fileId = storage.storing()
       .name(name)
-      .lastModifiedAt(lastModifiedAt)
+      .createdAt(lastModifiedAt)
       .data(data.getBytes(StandardCharsets.UTF_8))
       .store();
     FileDataReader reader = storage.read(fileId);
@@ -218,7 +218,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
     //
     String fileId = storage.storing()
       .name(name)
-      .lastModifiedAt(lastModifiedAt)
+      .createdAt(lastModifiedAt)
       .data(data.getBytes(StandardCharsets.UTF_8))
       .presetId(expectedFileId)
       .store();

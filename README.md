@@ -1,6 +1,37 @@
 # File Storage in DB
 
-Usage:
+You can use the following databases:
+
+ - Single relational database
+   - PostgreSQL
+   - Oracle
+ - Multiple relational database
+   - PostgreSQL
+   - Oracle
+ - MongoDB
+
+See source of [FileStorage](https://github.com/greetgo/greetgo.fstorage/blob/master/src/kz/greetgo/file_storage/FileStorage.java)
+
+## Single relational database usage
+
+```java
+public class FileStorageFactory {
+  public static FileStorage getFileStorage(String[] args) {
+    javax.sql.DataSource dataSource = getCoolDataSource();
+    
+    FileStorage fileStorage = FileStorageBuilder
+      .newBuilder()
+      .mandatoryMimeType(true)//make defining mime type mandatory
+      .mandatoryName(true)//make defining file name mandatory
+      .inDb(dataSource)//define place to store files
+      .build();
+    
+    return fileStorage;
+  }
+}
+```
+
+## Examples
 
 ```java
 import kz.greetgo.file_storage.FileStorage;
@@ -56,3 +87,4 @@ public class Examples {
 ```
 
 FileStorageBuilder can configure many parameters: table name, field names, etc.
+

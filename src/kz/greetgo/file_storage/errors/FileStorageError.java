@@ -5,7 +5,7 @@ public class FileStorageError extends RuntimeException {
     super(message);
   }
 
-  public FileStorageError(RuntimeException e) {
+  public FileStorageError(Exception e) {
     super(e);
   }
 }

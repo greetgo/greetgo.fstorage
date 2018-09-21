@@ -92,7 +92,7 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
       .setMimeTypeValidator(mimeType -> false)
       .build();
 
-    fileStorage.storing().data(RND.byteArray(5)).store();
+    fileStorage.storing().mimeType("some").data(RND.byteArray(5)).store();
   }
 
   @Test(dataProvider = "testStorageBuilder_DP")

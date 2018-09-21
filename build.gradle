@@ -13,13 +13,20 @@ group = 'kz.greetgo'
 sourceCompatibility = 1.8
 version = '2.0.0'
 
+def ggRepo = System.getenv('GG_REPO')?.trim()
+if (!ggRepo) ggRepo = System.getProperty('GG_REPO')?.trim()
+
 repositories {
   mavenLocal()
-  if (System.getenv('GG_REPO')?.trim()) maven { url System.getenv('GG_REPO') }
+  if (ggRepo) maven { url ggRepo }
   mavenCentral()
 }
 
 dependencies {
+  ext.mongoJavaDriverVersion = '3.8.1'
+
+  compileOnly "org.mongodb:mongo-java-driver:$mongoJavaDriverVersion"
+  testCompile "org.mongodb:mongo-java-driver:$mongoJavaDriverVersion"
 
   testCompile group: 'kz.greetgo.db', name: 'greetgo.db', version: '2.0.0'
 

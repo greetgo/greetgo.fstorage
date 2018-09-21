@@ -18,10 +18,10 @@ public interface FileStoringOperation {
   /**
    * Defines file last modification time
    *
-   * @param lastModifiedAt last modification time
+   * @param createdAt last modification time
    * @return reference to this
    */
-  FileStoringOperation lastModifiedAt(Date lastModifiedAt);
+  FileStoringOperation createdAt(Date createdAt);
 
   /**
    * Specifies file mime type

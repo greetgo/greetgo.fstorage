@@ -8,7 +8,7 @@ public class UnknownMimeType extends FileStorageError {
     this.mimeType = mimeType;
   }
 
-  public UnknownMimeType(String mimeType, RuntimeException e) {
+  public UnknownMimeType(String mimeType, Exception e) {
     super(e);
     this.mimeType = mimeType;
   }

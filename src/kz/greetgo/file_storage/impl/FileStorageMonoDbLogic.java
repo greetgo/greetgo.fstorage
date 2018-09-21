@@ -46,8 +46,8 @@ public class FileStorageMonoDbLogic implements FileStorage {
       }
 
       @Override
-      public FileStoringOperation lastModifiedAt(Date lastModifiedAt) {
-        params.lastModifiedAt = lastModifiedAt;
+      public FileStoringOperation createdAt(Date createdAt) {
+        params.createdAt = createdAt;
         return this;
       }
 
@@ -62,20 +62,20 @@ public class FileStorageMonoDbLogic implements FileStorage {
       }
 
       private void checkSetData() {
-        if (data != null || inputStream != null) throw new IllegalStateException("data already defined");
+        if (data != null || inputStream != null) { throw new IllegalStateException("data already defined"); }
       }
 
       @Override
       public FileStoringOperation data(InputStream inputStream) {
-        if (inputStream == null) throw new IllegalArgumentException("inputStream == null");
+        if (inputStream == null) { throw new IllegalArgumentException("inputStream == null"); }
         checkSetData();
         this.inputStream = inputStream;
         return this;
       }
 
       private byte[] getData() {
-        if (data != null) return data;
-        if (inputStream != null) return LocalUtil.readAll(inputStream);
+        if (data != null) { return data; }
+        if (inputStream != null) { return LocalUtil.readAll(inputStream); }
         throw new NoFileData();
       }
 
@@ -106,7 +106,9 @@ public class FileStorageMonoDbLogic implements FileStorage {
 
     FileDataReader reader = readOrNull(fileId);
 
-    if (reader == null) throw new NoFileWithId(fileId);
+    if (reader == null) {
+      throw new NoFileWithId(fileId);
+    }
 
     return reader;
   }
@@ -115,7 +117,7 @@ public class FileStorageMonoDbLogic implements FileStorage {
   public FileDataReader readOrNull(String fileId) {
     final FileParams params = monoDbOperations.readParams(fileId);
 
-    if (params == null) return null;
+    if (params == null) { return null; }
 
     return new FileDataReader() {
       @Override
@@ -131,13 +133,13 @@ public class FileStorageMonoDbLogic implements FileStorage {
       public byte[] dataAsArray() {
         {
           byte[] data = this.data;
-          if (data != null) return data;
+          if (data != null) { return data; }
         }
 
         synchronized (sync) {
           {
             byte[] data = this.data;
-            if (data != null) return data;
+            if (data != null) { return data; }
           }
 
           return data = monoDbOperations.getDataAsArray(params.sha1sum);

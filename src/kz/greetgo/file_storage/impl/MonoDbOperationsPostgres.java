@@ -49,7 +49,7 @@ public class MonoDbOperationsPostgres extends AbstractMonoDbOperations {
             .field("__paramsTableName__", params.name)
             .field("__paramsTableMimeType__", params.mimeType)
             .field("__paramsTableDataId__", sha1sum)
-            .fieldTimestamp("__paramsTableLastModifiedAt__", params.lastModifiedAt, true)
+            .fieldTimestamp("__paramsTableLastModifiedAt__", params.createdAt, true)
             .go()
           ;
         } catch (SQLException e) {

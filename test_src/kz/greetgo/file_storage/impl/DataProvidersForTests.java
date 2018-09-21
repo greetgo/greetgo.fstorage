@@ -6,14 +6,18 @@ import kz.greetgo.file_storage.impl.logging.FileStorageLogger;
 import kz.greetgo.file_storage.impl.logging.SqlLogger;
 import kz.greetgo.file_storage.impl.logging.events.FileStorageLoggerErrorEvent;
 import kz.greetgo.file_storage.impl.logging.events.FileStorageLoggerEvent;
+import kz.greetgo.file_storage.impl.util.MongodbUtil;
 import kz.greetgo.file_storage.impl.util.TestStorageBuilder;
 import kz.greetgo.file_storage.impl.util.TestUtil;
+import org.testng.SkipException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
+
+import static kz.greetgo.file_storage.impl.util.MongodbUtil.connectGetCollection;
 
 public class DataProvidersForTests {
   @BeforeMethod
@@ -89,6 +93,36 @@ public class DataProvidersForTests {
     };
   }
 
+  private TestStorageBuilder testBuilderForMongodb() {
+    return new TestStorageBuilder() {
+      final FileStorageBuilder builder = FileStorageBuilder.newBuilder();
+
+      @Override
+      public FileStorageBuilder getBuilder() {
+        return builder;
+      }
+
+      @Override
+      public FileStorage build() {
+
+        if (!MongodbUtil.hasMongodb()) {
+          throw new SkipException("Cannot access to MongoDB");
+        }
+
+        return getBuilder()
+          .configureFrom(this)
+          .inMongodb(connectGetCollection(getTable()))
+          .build()
+          ;
+      }
+
+      @Override
+      public String implInfo() {
+        return "MongoDB";
+      }
+    };
+  }
+
   private TestStorageBuilder testBuilderForMultiDb(DbType dbType) {
     return new TestStorageBuilder() {
       FileStorageBuilder builder = FileStorageBuilder.newBuilder();
@@ -121,6 +155,7 @@ public class DataProvidersForTests {
       {testBuilderForMonoDb(DbType.Oracle)},
       {testBuilderForMultiDb(DbType.Postgres)},
       {testBuilderForMultiDb(DbType.Oracle)},
+      {testBuilderForMongodb()}
     };
   }
 }

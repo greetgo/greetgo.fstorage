@@ -1,10 +1,12 @@
 package kz.greetgo.file_storage.impl;
 
+import com.mongodb.client.MongoCollection;
 import kz.greetgo.file_storage.errors.MultipleBuilderUsage;
 import kz.greetgo.file_storage.errors.NoFileMimeType;
 import kz.greetgo.file_storage.errors.NoFileName;
 import kz.greetgo.file_storage.errors.StorageTypeAlreadySelected;
 import kz.greetgo.file_storage.errors.UnknownMimeType;
+import org.bson.Document;
 
 import javax.sql.DataSource;
 import java.util.List;
@@ -20,7 +22,7 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
   boolean fixed = false;
 
   void checkFix() {
-    if (fixed) throw new MultipleBuilderUsage();
+    if (fixed) { throw new MultipleBuilderUsage(); }
   }
 
   @Override
@@ -44,7 +46,7 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
   }
 
   public void checkName(String name) {
-    if (mandatoryName && nullOrEmpty(name)) throw new NoFileName();
+    if (mandatoryName && nullOrEmpty(name)) { throw new NoFileName(); }
   }
 
   class DefaultIdGenerator implements Supplier<String> {
@@ -67,10 +69,19 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
 
   Supplier<String> idGenerator = new DefaultIdGenerator();
 
+  private boolean setIdGeneratorWasCalled = false;
+
   @Override
   public FileStorageBuilder setIdGenerator(int idLength, Supplier<String> idGenerator) {
-    if (idLength < 7) throw new IllegalArgumentException("Must be idLength >= 7: idLength = " + idLength);
-    if (idGenerator == null) throw new NullPointerException("idGenerator == null");
+    if (idLength < 7) {
+      throw new IllegalArgumentException("Must be idLength >= 7: idLength = " + idLength);
+    }
+
+    if (idGenerator == null) {
+      throw new NullPointerException("idGenerator == null");
+    }
+
+    setIdGeneratorWasCalled = true;
     fileIdLength = idLength;
     this.idGenerator = idGenerator;
     return this;
@@ -99,13 +110,13 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
   }
 
   void checkMimeType(String mimeType) {
-    if (mandatoryMimeType && nullOrEmpty(mimeType)) throw new NoFileMimeType();
-    if (mimeTypeValidator == null) return;
+    if (mandatoryMimeType && nullOrEmpty(mimeType)) { throw new NoFileMimeType(); }
+    if (mimeTypeValidator == null) { return; }
 
     try {
-      if (mimeTypeValidator.apply(mimeType)) return;
+      if (mimeTypeValidator.apply(mimeType)) { return; }
     } catch (RuntimeException e) {
-      if (e instanceof UnknownMimeType) throw e;
+      if (e instanceof UnknownMimeType) { throw e; }
       throw new UnknownMimeType(mimeType, e);
     }
 
@@ -122,7 +133,7 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
   }
 
   private void checkStorageTypeSelected() {
-    if (storageTypeSelected) throw new StorageTypeAlreadySelected();
+    if (storageTypeSelected) { throw new StorageTypeAlreadySelected(); }
   }
 
   @Override
@@ -130,5 +141,12 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
     checkStorageTypeSelected();
     storageTypeSelected = true;
     return new FileStorageBuilderMultiDbImpl(this, dataSourceList);
+  }
+
+  @Override
+  public FileStorageBuilderInMongodb inMongodb(MongoCollection<Document> collection) {
+    checkStorageTypeSelected();
+    storageTypeSelected = true;
+    return new FileStorageBuilderInMongodbImpl(this, collection);
   }
 }

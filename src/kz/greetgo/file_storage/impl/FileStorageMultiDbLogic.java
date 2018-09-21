@@ -51,8 +51,8 @@ public class FileStorageMultiDbLogic implements FileStorage {
       }
 
       @Override
-      public FileStoringOperation lastModifiedAt(Date lastModifiedAt) {
-        params.lastModifiedAt = lastModifiedAt;
+      public FileStoringOperation createdAt(Date createdAt) {
+        params.createdAt = createdAt;
         return this;
       }
 
