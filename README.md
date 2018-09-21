@@ -1,6 +1,6 @@
 # File Storage in DB
 
-Using this library you can store files in the databases listed above: store files under fileId
+Using this library you can store files in the databases listed below: store files under fileId
 and get files by fileId.
 
 FileId generates automatically and can be used in browser address bar (F6), or you can specify fileId by yourself.
