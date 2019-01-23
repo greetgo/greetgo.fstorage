@@ -73,7 +73,9 @@ public class FileStorageMultiDbLogic implements FileStorage {
       }
 
       private void checkSetData() {
-        if (data != null || inputStream != null) throw new IllegalStateException("data already defined");
+        if (data != null || inputStream != null) {
+          throw new IllegalStateException("data already defined");
+        }
       }
 
       @Override
@@ -85,8 +87,12 @@ public class FileStorageMultiDbLogic implements FileStorage {
       }
 
       private byte[] getData() {
-        if (data != null) return data;
-        if (inputStream != null) return readAll(inputStream);
+        if (data != null) {
+          return data;
+        }
+        if (inputStream != null) {
+          return readAll(inputStream);
+        }
         throw new NoFileData();
       }
 
@@ -102,7 +108,9 @@ public class FileStorageMultiDbLogic implements FileStorage {
         builder.parent.checkMimeType(params.mimeType);
 
         String fileId = params.presetFileId;
-        if (fileId == null) fileId = parent.idGenerator.get();
+        if (fileId == null) {
+          fileId = parent.idGenerator.get();
+        }
 
         try {
           createNew(getData(), params, fileId);
@@ -251,10 +259,23 @@ public class FileStorageMultiDbLogic implements FileStorage {
     Insert insert = new Insert(tableName(tablePosition));
     insert.add(FIELD_ID, fileId);
     insert.add(FIELD_FILE_CONTENT, data);
-    if (params.mimeType != null) insert.add(FIELD_MIME_TYPE, params.mimeType);
-    if (params.name != null) insert.add(FIELD_NAME, params.name);
+    if (params.mimeType != null) {
+      insert.add(FIELD_MIME_TYPE, params.mimeType);
+    }
+    if (params.name != null) {
+      insert.add(FIELD_NAME, params.name);
+    }
 
     operations.insert(dataSource, insert, tablePosition);
+  }
+
+  @Override
+  public void delete(String fileId) throws NoFileWithId {
+    TablePosition tablePosition = builder.tableSelector.selectTable(fileId);
+    DataSource dataSource = extractDataSource(tablePosition);
+    String tableName = tableName(tablePosition);
+
+    operations.delete(dataSource, tableName, FIELD_ID, fileId, tablePosition);
   }
 
   private byte[] loadData(String fileId) {

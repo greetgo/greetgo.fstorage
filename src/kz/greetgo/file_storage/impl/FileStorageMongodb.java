@@ -1,6 +1,7 @@
 package kz.greetgo.file_storage.impl;
 
 import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.result.DeleteResult;
 import kz.greetgo.file_storage.FileDataReader;
 import kz.greetgo.file_storage.FileStorage;
 import kz.greetgo.file_storage.FileStoringOperation;
@@ -18,9 +19,7 @@ import java.util.function.Function;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Projections.include;
-import static kz.greetgo.file_storage.impl.MongoUtil.toByteArray;
-import static kz.greetgo.file_storage.impl.MongoUtil.toDate;
-import static kz.greetgo.file_storage.impl.MongoUtil.toStr;
+import static kz.greetgo.file_storage.impl.MongoUtil.*;
 
 class FileStorageMongodb implements FileStorage {
   private final FileStorageBuilderInMongodbImpl builder;
@@ -116,6 +115,14 @@ class FileStorageMongodb implements FileStorage {
         return fileId;
       }
     };
+  }
+
+  @Override
+  public void delete(String fileId) throws NoFileWithId {
+    DeleteResult deleteResult = builder.collection.deleteOne(eq(builder.names.id, fileId));
+    if (deleteResult.getDeletedCount() < 1) {
+      throw new NoFileWithId(fileId);
+    }
   }
 
   @Override

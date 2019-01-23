@@ -30,4 +30,12 @@ public interface FileStorage {
    * @return file data reader or <code>null</code>, if specified file id is absent
    */
   FileDataReader readOrNull(String fileId);
+
+  /**
+   * Deletes file by id
+   *
+   * @param fileId file id to delete
+   * @throws NoFileWithId throws when file is already absent
+   */
+  void delete(String fileId) throws NoFileWithId;
 }

@@ -1,6 +1,7 @@
 package kz.greetgo.file_storage.impl;
 
 import kz.greetgo.file_storage.errors.FileIdAlreadyExists;
+import kz.greetgo.file_storage.errors.NoFileWithId;
 import kz.greetgo.file_storage.errors.Ora00972_IdentifierIsTooLong;
 import kz.greetgo.file_storage.impl.jdbc.Inserting;
 import kz.greetgo.file_storage.impl.jdbc.Query;
@@ -41,7 +42,6 @@ public class MonoDbOperationsOracle extends MonoDbOperationsPostgres {
         try {
 
 
-          //noinspection StringBufferReplaceableByString
           StringBuilder sql = new StringBuilder();
 //          structure.append("merge into __dataTable__ dest using ( select ? as id1, ? as data1 from dual ) src ");
 //          structure.append(" on (dest.__dataTableId__ = src.id1 and dest.__dataTableData__ = src.data1)");
@@ -139,4 +139,19 @@ public class MonoDbOperationsOracle extends MonoDbOperationsPostgres {
     }
   }
 
+  @Override
+  protected String loadSha1SumSql() {
+    return "select __paramsTableDataId__ from __paramsTable__ where __paramsTableId__ = ?";
+  }
+
+  protected void deleteEx(String fileId) throws SQLException, NoFileWithId {
+    try (Connection connection = builder.dataSource.getConnection()) {
+
+      String sha1sum = loadSha1sumByFileId(connection, fileId);
+
+      doDelete(connection, "delete from __paramsTable__ where __paramsTableId__ = ?", fileId, fileId);
+      doDelete(connection, "delete from __dataTable__ where __dataTableId__ = ?", sha1sum, fileId);
+
+    }
+  }
 }

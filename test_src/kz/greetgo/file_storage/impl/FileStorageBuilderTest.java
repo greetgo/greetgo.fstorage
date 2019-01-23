@@ -3,10 +3,7 @@ package kz.greetgo.file_storage.impl;
 import kz.greetgo.db.DbType;
 import kz.greetgo.file_storage.FileDataReader;
 import kz.greetgo.file_storage.FileStorage;
-import kz.greetgo.file_storage.errors.NoFileMimeType;
-import kz.greetgo.file_storage.errors.NoFileName;
-import kz.greetgo.file_storage.errors.StorageTypeAlreadySelected;
-import kz.greetgo.file_storage.errors.UnknownMimeType;
+import kz.greetgo.file_storage.errors.*;
 import kz.greetgo.file_storage.impl.util.RND;
 import kz.greetgo.file_storage.impl.util.TestStorageBuilder;
 import org.fest.assertions.api.Assertions;
@@ -161,5 +158,31 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
 
     FileDataReader reader = fileStorage.read(fileId);
     assertThat(reader.mimeType()).isNull();
+  }
+
+  @Test(dataProvider = "testStorageBuilder_DP", expectedExceptions = NoFileWithId.class)
+  public void deleteFile_NoFileWithId(TestStorageBuilder builder) {
+    builder.build().delete(RND.str(10));
+  }
+
+
+  @Test(dataProvider = "testStorageBuilder_DP")
+  public void deleteFile_ok(TestStorageBuilder builder) {
+    FileStorage fileStorage = builder.build();
+
+    String fileId = fileStorage.storing()
+      .name(RND.str(10) + ".txt")
+      .data(RND.byteArray(1000))
+      .store();
+
+    assertThat(fileStorage.readOrNull(fileId)).isNotNull();
+
+    //
+    //
+    fileStorage.delete(fileId);
+    //
+    //
+
+    assertThat(fileStorage.readOrNull(fileId)).isNull();
   }
 }

@@ -1,11 +1,7 @@
 package kz.greetgo.file_storage.impl;
 
 import com.mongodb.client.MongoCollection;
-import kz.greetgo.file_storage.errors.MultipleBuilderUsage;
-import kz.greetgo.file_storage.errors.NoFileMimeType;
-import kz.greetgo.file_storage.errors.NoFileName;
-import kz.greetgo.file_storage.errors.StorageTypeAlreadySelected;
-import kz.greetgo.file_storage.errors.UnknownMimeType;
+import kz.greetgo.file_storage.errors.*;
 import org.bson.Document;
 
 import javax.sql.DataSource;
@@ -22,7 +18,9 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
   boolean fixed = false;
 
   void checkFix() {
-    if (fixed) { throw new MultipleBuilderUsage(); }
+    if (fixed) {
+      throw new MultipleBuilderUsage();
+    }
   }
 
   @Override
@@ -46,10 +44,13 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
   }
 
   public void checkName(String name) {
-    if (mandatoryName && nullOrEmpty(name)) { throw new NoFileName(); }
+    if (mandatoryName && nullOrEmpty(name)) {
+      throw new NoFileName();
+    }
   }
 
   class DefaultIdGenerator implements Supplier<String> {
+    @SuppressWarnings("SpellCheckingInspection")
     private static final String ENG = "abcdefghijklmnopqrstuvwxyz";
     private static final String DEG = "0123456789";
     private final char[] ALL = (ENG + ENG.toUpperCase() + DEG).toCharArray();
@@ -58,7 +59,7 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
     @Override
     public String get() {
       final int len = 13;
-      char ret[] = new char[len];
+      char[] ret = new char[len];
       int length = ALL.length;
       for (int i = 0; i < len; i++) {
         ret[i] = ALL[RND.nextInt(length)];
@@ -69,6 +70,7 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
 
   Supplier<String> idGenerator = new DefaultIdGenerator();
 
+  @SuppressWarnings({"FieldCanBeLocal", "unused"})
   private boolean setIdGeneratorWasCalled = false;
 
   @Override
@@ -110,13 +112,21 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
   }
 
   void checkMimeType(String mimeType) {
-    if (mandatoryMimeType && nullOrEmpty(mimeType)) { throw new NoFileMimeType(); }
-    if (mimeTypeValidator == null) { return; }
+    if (mandatoryMimeType && nullOrEmpty(mimeType)) {
+      throw new NoFileMimeType();
+    }
+    if (mimeTypeValidator == null) {
+      return;
+    }
 
     try {
-      if (mimeTypeValidator.apply(mimeType)) { return; }
+      if (mimeTypeValidator.apply(mimeType)) {
+        return;
+      }
     } catch (RuntimeException e) {
-      if (e instanceof UnknownMimeType) { throw e; }
+      if (e instanceof UnknownMimeType) {
+        throw e;
+      }
       throw new UnknownMimeType(mimeType, e);
     }
 
@@ -133,7 +143,9 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
   }
 
   private void checkStorageTypeSelected() {
-    if (storageTypeSelected) { throw new StorageTypeAlreadySelected(); }
+    if (storageTypeSelected) {
+      throw new StorageTypeAlreadySelected();
+    }
   }
 
   @Override

@@ -1,10 +1,13 @@
 package kz.greetgo.file_storage.impl;
 
 import kz.greetgo.file_storage.errors.FileIdAlreadyExists;
+import kz.greetgo.file_storage.errors.NoFileWithId;
 import kz.greetgo.file_storage.impl.jdbc.Inserting;
 import kz.greetgo.file_storage.impl.jdbc.Query;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class MonoDbOperationsPostgres extends AbstractMonoDbOperations {
@@ -71,6 +74,78 @@ public class MonoDbOperationsPostgres extends AbstractMonoDbOperations {
 
   }
 
+  protected void deleteEx(String fileId) throws SQLException, NoFileWithId {
+    try (Connection connection = builder.dataSource.getConnection()) {
+
+      connection.setAutoCommit(false);
+      try {
+
+        String sha1sum = loadSha1sumByFileId(connection, fileId);
+
+        doDelete(connection, "delete from __paramsTable__ where __paramsTableId__ = ?", fileId, fileId);
+        doDelete(connection, "delete from __dataTable__ where __dataTableId__ = ?", sha1sum, fileId);
+
+        connection.commit();
+
+        return;
+
+      } catch (SQLException | RuntimeException e) {
+        connection.rollback();
+        throw e;
+      } finally {
+        connection.setAutoCommit(true);
+      }
+    }
+  }
+
+  protected void doDelete(Connection connection, String sql, String id, String fileId) throws SQLException {
+    try (PreparedStatement ps = connection.prepareStatement(this.sql(sql))) {
+
+      ps.setString(1, id);
+
+      if (ps.executeUpdate() < 1) {
+        throw new NoFileWithId(fileId);
+      }
+
+    }
+  }
+
+  protected String loadSha1SumSql() {
+    return "select __paramsTableDataId__ from __paramsTable__ where __paramsTableId__ = ? for update";
+  }
+
+  protected String loadSha1sumByFileId(Connection connection, String fileId) throws SQLException {
+    try (PreparedStatement ps = connection.prepareStatement(sql(loadSha1SumSql()))) {
+      ps.setString(1, fileId);
+
+      try (ResultSet rs = ps.executeQuery()) {
+
+        if (!rs.next()) {
+          throw new NoFileWithId(fileId);
+        }
+
+        return rs.getString(1);
+      }
+
+    }
+  }
+
+  @Override
+  public void delete(String fileId) throws NoFileWithId {
+    try {
+      deleteEx(fileId);
+    } catch (SQLException e) {
+      if (e.getMessage() != null && e.getMessage().startsWith("ORA-00942")) {
+        throw new NoFileWithId(fileId);
+      }
+      if ("42P01".equals(e.getSQLState())) {
+        throw new NoFileWithId(fileId);
+      }
+      throw new RuntimeException("SQLState = " + e.getSQLState() + " : " + e.getMessage(), e);
+    }
+  }
+
+
   @Override
   public void prepareDatabase(DatabaseNotPrepared context) {
     try {
@@ -95,7 +170,7 @@ public class MonoDbOperationsPostgres extends AbstractMonoDbOperations {
       try (Query query = new Query(connection)) {
         query.exec(sql("create table __dataTable__ (" +
           "   __dataTableId__   varchar(40) not null primary key" +
-          ",  __dataTableData__ bytea" +
+          ",  __dataTableData__ byteA" +
           ")"));
 
         query.exec(sql("create table __paramsTable__ (" +
@@ -109,7 +184,6 @@ public class MonoDbOperationsPostgres extends AbstractMonoDbOperations {
 
     }
   }
-
 
   @Override
   public FileParams readParams(String fileId) {
@@ -164,7 +238,9 @@ public class MonoDbOperationsPostgres extends AbstractMonoDbOperations {
 
         query.go();
 
-        if (!query.rs().next()) throw new RuntimeException("No data for sha1sum = " + sha1sum);
+        if (!query.rs().next()) {
+          throw new RuntimeException("No data for sha1sum = " + sha1sum);
+        }
         return query.rs().getBytes(1);
       }
 

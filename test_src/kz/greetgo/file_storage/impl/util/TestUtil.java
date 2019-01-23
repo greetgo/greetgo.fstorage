@@ -16,8 +16,9 @@ public class TestUtil {
       public Connection getConnection() throws SQLException {
         try {
           return connectionManager.getNewConnection();
+        } catch (SQLException e) {
+          throw e;
         } catch (Exception e) {
-          if (e instanceof SQLException) throw (SQLException) e;
           throw new RuntimeException(e);
         }
       }

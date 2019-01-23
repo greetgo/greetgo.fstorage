@@ -115,8 +115,12 @@ public class MultiDbOperationsPostgres implements MultiDbOperations {
       query.update();
 
     } catch (SQLException e) {
-      if ("42P01".equals(e.getSQLState())) throw new TableIsAbsent(tablePosition);
-      if (e.getMessage().startsWith("ORA-00942:")) throw new TableIsAbsent(tablePosition);
+      if ("42P01".equals(e.getSQLState())) {
+        throw new TableIsAbsent(tablePosition);
+      }
+      if (e.getMessage().startsWith("ORA-00942:")) {
+        throw new TableIsAbsent(tablePosition);
+      }
       throw new RuntimeException("e.getSQLState() = " + e.getSQLState() + " :: " + e.getMessage(), e);
     }
   }
@@ -140,8 +144,34 @@ public class MultiDbOperationsPostgres implements MultiDbOperations {
       return query.rs().getBytes(1);
 
     } catch (SQLException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException("SQLState = " + e.getSQLState() + " : " + e.getMessage(), e);
     }
+  }
+
+  @Override
+  public void delete(DataSource dataSource,
+                     String tableName, String fileIdField, String fileId,
+                     TablePosition tablePosition) {
+
+    try (Connection connection = dataSource.getConnection(); Query query = new Query(connection)) {
+
+      query.sql.append("delete from ").append(tableName).append(" where ").append(fileIdField).append(" = ?");
+      query.params.add(fileId);
+
+      if (query.update() < 1) {
+        throw new NoFileWithId(fileId);
+      }
+
+    } catch (SQLException e) {
+      if ("42P01".equals(e.getSQLState())) {
+        throw new NoFileWithId(fileId);
+      }
+      if (e.getMessage() != null && e.getMessage().startsWith("ORA-00942")) {
+        throw new NoFileWithId(fileId);
+      }
+      throw new RuntimeException("SQLState = " + e.getSQLState() + " : " + e.getMessage(), e);
+    }
+
   }
 
   @Override
@@ -167,7 +197,9 @@ public class MultiDbOperationsPostgres implements MultiDbOperations {
       }
 
     } catch (SQLException e) {
-      if ("42P01".equals(e.getSQLState())) return null;
+      if ("42P01".equals(e.getSQLState())) {
+        return null;
+      }
       throw new RuntimeException("e.getSQLState() = " + e.getSQLState() + " :: " + e.getMessage(), e);
     }
   }

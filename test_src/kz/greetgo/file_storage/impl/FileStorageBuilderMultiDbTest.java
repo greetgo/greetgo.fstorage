@@ -3,17 +3,20 @@ package kz.greetgo.file_storage.impl;
 import kz.greetgo.db.DbType;
 import kz.greetgo.file_storage.FileDataReader;
 import kz.greetgo.file_storage.FileStorage;
+import kz.greetgo.file_storage.errors.NoFileWithId;
 import kz.greetgo.file_storage.impl.util.RND;
+import kz.greetgo.file_storage.impl.util.TestUtil;
 import org.fest.assertions.api.Assertions;
 import org.testng.annotations.Test;
 
 import javax.sql.DataSource;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
@@ -38,7 +41,7 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void defaultValue_tableName(DbType dbType)  {
+  public void defaultValue_tableName(DbType dbType) {
     FileStorageBuilderMultiDb builder = FileStorageBuilder
       .newBuilder()
       .inMultiDb(dataSourceList(dbType, SCHEMA_PREFIX, 3));
@@ -52,7 +55,7 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
 
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void defaultValue_tableCountPerDb(DbType dbType)  {
+  public void defaultValue_tableCountPerDb(DbType dbType) {
     FileStorageBuilderMultiDb builder = FileStorageBuilder
       .newBuilder()
       .inMultiDb(dataSourceList(dbType, SCHEMA_PREFIX, 3));
@@ -65,7 +68,7 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
   }
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void defaultValue_tableDetector(DbType dbType)  {
+  public void defaultValue_tableDetector(DbType dbType) {
     FileStorageBuilderMultiDb builder = FileStorageBuilder
       .newBuilder()
       .inMultiDb(dataSourceList(dbType, SCHEMA_PREFIX, 3));
@@ -75,16 +78,16 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
     TablePosition tablePosition = builder.getTableSelector().selectTable("q1");
     assertThat(tablePosition).isNotNull();
 
-    String fileidOut[] = new String[]{null};
+    String[] fileIdOut = new String[]{null};
 
     builder = builder.setTableSelector(fileId -> {
-      fileidOut[0] = fileId;
+      fileIdOut[0] = fileId;
       return new TablePosition(19919, 2311);
     });
 
     assertThat(builder.getTableSelector().selectTable("asd qq oo ii"))
       .isEqualsToByComparingFields(new TablePosition(19919, 2311));
-    assertThat(fileidOut[0]).isEqualTo("asd qq oo ii");
+    assertThat(fileIdOut[0]).isEqualTo("asd qq oo ii");
   }
 
 
@@ -105,8 +108,8 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
       })
       .build();
 
-    String dataArray[] = new String[3];
-    String fileIdArray[] = new String[dataArray.length];
+    String[] dataArray = new String[7];
+    String[] fileIdArray = new String[dataArray.length];
 
     List<Thread> threadList = new ArrayList<>();
     for (int i = 0; i < dataArray.length; i++) {
@@ -115,7 +118,7 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
         dataArray[I] = "Содержимое " + RND.str(500);
         fileIdArray[I] = fileStorage.storing()
           .name("Hello" + I)
-          .data(dataArray[I].getBytes(StandardCharsets.UTF_8))
+          .data(dataArray[I].getBytes(UTF_8))
           .store();
       }));
     }
@@ -127,19 +130,21 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
 
     for (int i = 0; i < dataArray.length; i++) {
 
-      if (fileIdArray[i] == null) { Assertions.fail("fileIdArray[" + i + "] == null"); }
+      if (fileIdArray[i] == null) {
+        Assertions.fail("fileIdArray[" + i + "] == null");
+      }
 
       FileDataReader reader = fileStorage.read(fileIdArray[i]);
       assertThat(reader.id()).isEqualTo(fileIdArray[i]);
       assertThat(reader.id()).startsWith("1-2-");
-      assertThat(new String(reader.dataAsArray(), StandardCharsets.UTF_8)).startsWith(dataArray[i]);
+      assertThat(new String(reader.dataAsArray(), UTF_8)).startsWith(dataArray[i]);
 
     }
   }
 
 
   @Test(dataProvider = "dbTypeDataProvider")
-  public void store_read_parallelCreation_manyRecords(DbType dbType) throws Exception {
+  public void store_read_delete_parallelCreation_manyRecords(DbType dbType) throws Exception {
     List<DataSource> dataSourceList = dataSourceList(dbType, SCHEMA_PREFIX, 4);
 
     FileStorage fileStorage = FileStorageBuilder
@@ -185,10 +190,12 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
               dot = queue.poll();
             }
 
-            if (dot == null) { return; }
+            if (dot == null) {
+              return;
+            }
             dot.fileId.set(fileStorage.storing()
               .name(dot.name)
-              .data(dot.content.getBytes(StandardCharsets.UTF_8))
+              .data(dot.content.getBytes(UTF_8))
               .store());
           }
 
@@ -204,8 +211,89 @@ public class FileStorageBuilderMultiDbTest extends DataProvidersForTests {
     for (Dot dot : list) {
       FileDataReader reader = fileStorage.read(dot.fileId.get());
       assertThat(reader.id()).isEqualTo(dot.fileId.get());
-      assertThat(new String(reader.dataAsArray(), StandardCharsets.UTF_8)).isEqualTo(dot.content);
+      assertThat(new String(reader.dataAsArray(), UTF_8)).isEqualTo(dot.content);
       assertThat(reader.name()).isEqualTo(dot.name);
     }
+
+    for (Dot dot : list) {
+
+      fileStorage.delete(dot.fileId.get());
+
+      FileDataReader reader = fileStorage.readOrNull(dot.fileId.get());
+      assertThat(reader).isNull();
+    }
+
+  }
+
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void deleteFilesInParallel(DbType dbType) throws InterruptedException {
+    List<DataSource> dataSourceList = dataSourceList(dbType, SCHEMA_PREFIX, 4);
+
+    FileStorage fileStorage = FileStorageBuilder
+      .newBuilder()
+      .inMultiDb(dataSourceList)
+      .setTableCountPerDb(3)
+      .setTableName("del_" + RND.intStr(10))
+      .build();
+
+    List<String> fileIdList = new ArrayList<>();
+
+    for (int i = 0; i < 300; i++) {
+
+      String fileId = fileStorage.storing()
+        .data(("for deletion" + RND.str(1000)).getBytes(UTF_8))
+        .name("File # " + i)
+        .store();
+
+      fileIdList.add(fileId);
+    }
+
+    for (String fileId : fileIdList) {
+
+      final AtomicInteger ok = new AtomicInteger(0);
+      final AtomicInteger error = new AtomicInteger(0);
+
+      Runnable actionDelete = () -> {
+        try {
+          fileStorage.delete(fileId);
+          ok.incrementAndGet();
+        } catch (NoFileWithId e) {
+          error.incrementAndGet();
+        }
+      };
+
+      Thread thread1 = new Thread(actionDelete);
+      Thread thread2 = new Thread(actionDelete);
+      Thread thread3 = new Thread(actionDelete);
+      Thread thread4 = new Thread(actionDelete);
+
+      thread1.start();
+      thread2.start();
+      thread3.start();
+      thread4.start();
+
+      thread1.join();
+      thread2.join();
+      thread3.join();
+      thread4.join();
+
+      assertThat(ok.get()).isEqualTo(1);
+      assertThat(error.get()).isEqualTo(3);
+    }
+
+  }
+
+  @Test(dataProvider = "dbTypeDataProvider", expectedExceptions = NoFileWithId.class)
+  public void deleteAbsentFile(DbType dbType) {
+    List<DataSource> dataSourceList = dataSourceList(dbType, SCHEMA_PREFIX, 4);
+
+    FileStorage fileStorage = FileStorageBuilder
+      .newBuilder()
+      .inMultiDb(dataSourceList)
+      .setTableCountPerDb(3)
+      .setTableName("del1_" + RND.intStr(10))
+      .build();
+
+    fileStorage.delete(RND.str(10));
   }
 }

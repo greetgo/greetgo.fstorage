@@ -1,6 +1,7 @@
 package kz.greetgo.file_storage.impl.db;
 
 import kz.greetgo.conf.SysParams;
+import kz.greetgo.file_storage.impl.util.UserExistsError;
 import org.apache.commons.dbcp2.BasicDataSource;
 
 import javax.sql.DataSource;
@@ -53,6 +54,8 @@ public class ConnectionManagerPostgreSQL extends ConnectionManager {
   private void prepareDbSchema() {
     try {
       prepareDbSchemaException();
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -73,7 +76,14 @@ public class ConnectionManagerPostgreSQL extends ConnectionManager {
     try (Connection con = DriverManager.getConnection(SysParams.pgAdminUrl(), SysParams.pgAdminUserid(),
       SysParams.pgAdminPassword())) {
 
-      createDatabase(con);
+      while (true) {
+        try {
+          createDatabase(con);
+          break;
+        } catch (UserExistsError e) {
+          query(con, "drop user " + getDbSchema());
+        }
+      }
 
     }
   }
@@ -83,7 +93,12 @@ public class ConnectionManagerPostgreSQL extends ConnectionManager {
       query(con, "create user " + getDbSchema() + " with password '" + getDbSchema() + "'");
       query(con, "create database " + getDbSchema() + " with owner " + getDbSchema());
     } catch (SQLException e) {
-      if ("23505".equals(e.getSQLState())) return;
+      if ("23505".equals(e.getSQLState())) {
+        return;
+      }
+      if ("42710".equals(e.getSQLState())) {
+        throw new UserExistsError(getDbSchema());
+      }
       throw new RuntimeException("e.getSQLState() = " + e.getSQLState() + " :: " + e.getMessage(), e);
     }
   }

@@ -3,13 +3,7 @@ package kz.greetgo.file_storage.impl;
 import kz.greetgo.db.DbType;
 import kz.greetgo.file_storage.FileDataReader;
 import kz.greetgo.file_storage.FileStorage;
-import kz.greetgo.file_storage.errors.FileIdAlreadyExists;
-import kz.greetgo.file_storage.errors.NoFileData;
-import kz.greetgo.file_storage.errors.NoFileMimeType;
-import kz.greetgo.file_storage.errors.NoFileName;
-import kz.greetgo.file_storage.errors.NoFileWithId;
-import kz.greetgo.file_storage.errors.Ora00972_IdentifierIsTooLong;
-import kz.greetgo.file_storage.errors.UnknownMimeType;
+import kz.greetgo.file_storage.errors.*;
 import kz.greetgo.file_storage.impl.util.RND;
 import kz.greetgo.file_storage.impl.util.TestUtil;
 import org.fest.assertions.api.Assertions;
@@ -21,7 +15,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
@@ -408,7 +404,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   public void unknownMimeType(DbType dbType) {
     String rnd = RND.intStr(7);
 
-    String actualMimeType[] = new String[]{null};
+    String[] actualMimeType = new String[]{null};
 
     FileStorage storage = FileStorageBuilder
       .newBuilder()
@@ -445,7 +441,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   public void unknownMimeType_throwsSomeError(DbType dbType) {
     String rnd = RND.intStr(7);
 
-    String actualMimeType[] = new String[]{null};
+    String[] actualMimeType = new String[]{null};
     String errorMessage = RND.str(10);
 
     FileStorage storage = FileStorageBuilder
@@ -484,7 +480,7 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
   public void unknownMimeType_throwsUnknownMimeType(DbType dbType) {
     String rnd = RND.intStr(7);
 
-    String actualMimeType[] = new String[]{null};
+    String[] actualMimeType = new String[]{null};
     String errorMessage = RND.str(10);
 
     FileStorage storage = FileStorageBuilder
@@ -616,5 +612,101 @@ public class FileStorageBuilderMonoDbTest extends DataProvidersForTests {
       .inDb(TestUtil.createFrom(dbType, SCHEMA));
 
     assertThat(builder.getParamsTableNameLength()).isEqualTo(300);
+  }
+
+  @Test(dataProvider = "dbTypeDataProvider")
+  public void deleteFilesInParallel(DbType dbType) throws Throwable {
+    String suffix = RND.intStr(10);
+    FileStorage fileStorage = FileStorageBuilder
+      .newBuilder()
+      .inDb(TestUtil.createFrom(dbType, SCHEMA))
+      .setDataTable("data_" + suffix)
+      .setParamsTable("par_" + suffix)
+      .build();
+
+    class DeleteThread extends Thread {
+
+      private final String fileId;
+      private final AtomicInteger okCount;
+      private final AtomicInteger errCount;
+
+      public DeleteThread(String fileId, AtomicInteger okCount, AtomicInteger errCount) {
+        this.fileId = fileId;
+        this.okCount = okCount;
+        this.errCount = errCount;
+      }
+
+      Throwable error = null;
+
+      @Override
+      public void run() {
+        try {
+          fileStorage.delete(fileId);
+          okCount.incrementAndGet();
+        } catch (Throwable error) {
+          if (!(error instanceof NoFileWithId)) {
+            this.error = error;
+          }
+
+          errCount.incrementAndGet();
+        }
+      }
+    }
+
+    List<String> fileIdList = new ArrayList<>();
+
+    for (int i = 0; i < 30; i++) {
+
+      String fileId = fileStorage.storing()
+        .data(("for deletion" + RND.str(1000)).getBytes(UTF_8))
+        .name("File # " + i)
+        .store();
+
+      fileIdList.add(fileId);
+    }
+
+    for (String fileId : fileIdList) {
+
+      AtomicInteger okCount = new AtomicInteger(0);
+      AtomicInteger errCount = new AtomicInteger(0);
+
+      DeleteThread[] threads = new DeleteThread[4];
+
+      for (int i = 0; i < threads.length; i++) {
+        threads[i] = new DeleteThread(fileId, okCount, errCount);
+      }
+      for (DeleteThread thread : threads) {
+        thread.start();
+      }
+      for (DeleteThread thread : threads) {
+        thread.join();
+        if (thread.error != null) {
+          thread.error.printStackTrace();
+        }
+      }
+      for (DeleteThread thread : threads) {
+        if (thread.error != null) {
+          throw thread.error;
+        }
+      }
+
+      assertThat(okCount.get()).isEqualTo(1);
+      assertThat(errCount.get()).isEqualTo(3);
+    }
+
+  }
+
+  @Test(dataProvider = "dbTypeDataProvider", expectedExceptions = NoFileWithId.class)
+  public void deleteAbsentFile(DbType dbType) {
+    String suffix = RND.intStr(10);
+    FileStorage fileStorage = FileStorageBuilder
+      .newBuilder()
+      .inDb(TestUtil.createFrom(dbType, SCHEMA))
+      .setDataTable("data1_" + suffix)
+      .setParamsTable("par1_" + suffix)
+      .build();
+
+
+    fileStorage.delete(RND.str(10));
   }
 }

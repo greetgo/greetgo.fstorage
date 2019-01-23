@@ -2,11 +2,7 @@ package kz.greetgo.file_storage.impl.jdbc;
 
 import kz.greetgo.file_storage.impl.logging.FileStorageLogger;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +33,7 @@ public class Query implements AutoCloseable {
     }
   }
 
-  public ResultSet rs() throws SQLException {
+  public ResultSet rs() {
     if (rs == null) throw new RuntimeException("Please call go()");
     return rs;
   }
@@ -83,7 +79,9 @@ public class Query implements AutoCloseable {
   private int updateCount = 0;
 
   public int update() throws SQLException {
-    if (rs != null) throw new IllegalStateException("Please create new Query");
+    if (rs != null) {
+      throw new IllegalStateException("Please create new Query");
+    }
     updated = true;
     prepareStatement();
     try {
