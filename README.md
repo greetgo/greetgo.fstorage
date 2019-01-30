@@ -36,7 +36,7 @@ In Maven
 In gradle
 
 ```groovy
-compile "kz.greetgo:greetgo.fstorage:2.0.1"
+compile "kz.greetgo:greetgo.fstorage:2.1.0"
 ```
 
 ## Single relational database usage

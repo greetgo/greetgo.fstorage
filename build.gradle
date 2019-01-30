@@ -84,7 +84,7 @@ jar {
 
 uploadToMavenCentral {
   description = 'File Storage Implementation'
-  url = 'https://tech.greetgo.kz/test_project.php'
+  url = 'https://tech.greetgo.kz/fstorage.php'
   scm {
     url = 'https://github.com/greetgo/fstorage.git'
   }
