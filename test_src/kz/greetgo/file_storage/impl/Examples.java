@@ -21,9 +21,13 @@ public class Examples {
   private void execWithMonoDb() {
     DataSource dataSource = TestUtil.createFrom(DbType.Postgres, "fs2");
 
+    MimeTypeConfigurator mimeTypeConfigurator = new MimeTypeConfigurator();
+    mimeTypeConfigurator.registerBaseMimeTypes();
+    //mimeTypeConfigurator.here you can register another mime types
+
     FileStorage fileStorage = FileStorageBuilder
       .newBuilder()
-      .configureFrom(MimeTypeBaseConfigurator.get())
+      .configureFrom(mimeTypeConfigurator)
       .mandatoryMimeType(true)
       .mandatoryName(true)
       .inDb(dataSource)
@@ -37,9 +41,13 @@ public class Examples {
     DataSource dataSource2 = TestUtil.createFrom(DbType.Postgres, "fs2_2");
     DataSource dataSource3 = TestUtil.createFrom(DbType.Postgres, "fs2_3");
 
+    MimeTypeConfigurator mimeTypeConfigurator = new MimeTypeConfigurator();
+    mimeTypeConfigurator.registerBaseMimeTypes();
+    //mimeTypeConfigurator.here you can register another mime types
+
     FileStorage fileStorage = FileStorageBuilder
       .newBuilder()
-      .configureFrom(MimeTypeBaseConfigurator.get())
+      .configureFrom(mimeTypeConfigurator)
       .mandatoryMimeType(true)
       .mandatoryName(true)
       .inMultiDb(Arrays.asList(dataSource1, dataSource2, dataSource3))

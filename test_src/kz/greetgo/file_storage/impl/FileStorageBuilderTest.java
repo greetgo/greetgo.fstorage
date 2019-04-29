@@ -3,7 +3,11 @@ package kz.greetgo.file_storage.impl;
 import kz.greetgo.db.DbType;
 import kz.greetgo.file_storage.FileDataReader;
 import kz.greetgo.file_storage.FileStorage;
-import kz.greetgo.file_storage.errors.*;
+import kz.greetgo.file_storage.errors.NoFileMimeType;
+import kz.greetgo.file_storage.errors.NoFileName;
+import kz.greetgo.file_storage.errors.NoFileWithId;
+import kz.greetgo.file_storage.errors.StorageTypeAlreadySelected;
+import kz.greetgo.file_storage.errors.UnknownMimeType;
 import kz.greetgo.file_storage.impl.util.RND;
 import kz.greetgo.file_storage.impl.util.TestStorageBuilder;
 import org.fest.assertions.api.Assertions;
@@ -126,7 +130,9 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
 
   @Test(dataProvider = "testStorageBuilder_DP")
   public void probeMimeTypeBaseConfigurator_existsExtension(TestStorageBuilder builder) {
-    MimeTypeBaseConfigurator.get().configure(builder.getBuilder());
+    MimeTypeConfigurator mimeTypeConfigurator = new MimeTypeConfigurator();
+    mimeTypeConfigurator.registerBaseMimeTypes();
+    mimeTypeConfigurator.configure(builder.getBuilder());
 
     FileStorage fileStorage = builder.build();
 
@@ -144,7 +150,9 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
 
   @Test(dataProvider = "testStorageBuilder_DP")
   public void probeMimeTypeBaseConfigurator_leftExtension(TestStorageBuilder builder) {
-    MimeTypeBaseConfigurator.get().configure(builder.getBuilder());
+    MimeTypeConfigurator mimeTypeConfigurator = new MimeTypeConfigurator();
+    mimeTypeConfigurator.registerBaseMimeTypes();
+    mimeTypeConfigurator.configure(builder.getBuilder());
 
     FileStorage fileStorage = builder.build();
 
