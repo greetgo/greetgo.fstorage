@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static kz.greetgo.file_storage.impl.util.MongodbUtil.connectGetCollection;
+import static kz.greetgo.file_storage.impl.util.MongodbUtil.createMongoClient;
 
 public class DataProvidersForTests {
   @BeforeMethod
@@ -123,6 +124,37 @@ public class DataProvidersForTests {
     };
   }
 
+  private TestStorageBuilder testBuilderForMongoGridFs() {
+    return new TestStorageBuilder() {
+      final FileStorageBuilder builder = FileStorageBuilder.newBuilder();
+
+      @Override
+      public FileStorageBuilder getBuilder() {
+        return builder;
+      }
+
+      @Override
+      public FileStorage build() {
+
+        if (!MongodbUtil.hasMongodb()) {
+          throw new SkipException("Cannot access to MongoDB");
+        }
+
+        return getBuilder()
+          .configureFrom(this)
+          .inMongoGridFs(createMongoClient())
+          .bucketName(getTable())
+          .build()
+          ;
+      }
+
+      @Override
+      public String implInfo() {
+        return "MongoDB GridFS";
+      }
+    };
+  }
+
   private TestStorageBuilder testBuilderForMultiDb(DbType dbType) {
     return new TestStorageBuilder() {
       FileStorageBuilder builder = FileStorageBuilder.newBuilder();
@@ -155,7 +187,8 @@ public class DataProvidersForTests {
       {testBuilderForMonoDb(DbType.Oracle)},
       {testBuilderForMultiDb(DbType.Postgres)},
       {testBuilderForMultiDb(DbType.Oracle)},
-      {testBuilderForMongodb()}
+      {testBuilderForMongodb()},
+      {testBuilderForMongoGridFs()},
     };
   }
 }

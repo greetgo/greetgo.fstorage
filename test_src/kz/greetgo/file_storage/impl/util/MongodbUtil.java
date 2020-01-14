@@ -13,8 +13,12 @@ import static com.mongodb.client.model.Filters.eq;
 
 public class MongodbUtil {
 
+  public static MongoClient createMongoClient() {
+    return new MongoClient();
+  }
+
   public static MongoCollection<Document> connectGetCollection(String collectionName) {
-    MongoClient mongoClient = new MongoClient();
+    MongoClient mongoClient = createMongoClient();
     MongoDatabase database = mongoClient.getDatabase(System.getProperty("user.name") + "_" + collectionName);
     return database.getCollection("fileStorage");
   }

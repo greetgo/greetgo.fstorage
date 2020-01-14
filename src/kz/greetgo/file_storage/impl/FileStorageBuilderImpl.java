@@ -1,10 +1,16 @@
 package kz.greetgo.file_storage.impl;
 
+import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
-import kz.greetgo.file_storage.errors.*;
+import kz.greetgo.file_storage.errors.MultipleBuilderUsage;
+import kz.greetgo.file_storage.errors.NoFileMimeType;
+import kz.greetgo.file_storage.errors.NoFileName;
+import kz.greetgo.file_storage.errors.StorageTypeAlreadySelected;
+import kz.greetgo.file_storage.errors.UnknownMimeType;
 import org.bson.Document;
 
 import javax.sql.DataSource;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
@@ -49,12 +55,12 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
     }
   }
 
-  class DefaultIdGenerator implements Supplier<String> {
+  private static class DefaultIdGenerator implements Supplier<String> {
     @SuppressWarnings("SpellCheckingInspection")
     private static final String ENG = "abcdefghijklmnopqrstuvwxyz";
     private static final String DEG = "0123456789";
-    private final char[] ALL = (ENG + ENG.toUpperCase() + DEG).toCharArray();
-    private final Random RND = new Random();
+    private final char[] ALL = (ENG.toLowerCase() + ENG.toUpperCase() + DEG).toCharArray();
+    private final Random RND = new SecureRandom();
 
     @Override
     public String get() {
@@ -160,5 +166,12 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
     checkStorageTypeSelected();
     storageTypeSelected = true;
     return new FileStorageBuilderInMongodbImpl(this, collection);
+  }
+
+  @Override
+  public FileStorageBuilderInMongoGridFs inMongoGridFs(MongoClient mongoClient) {
+    checkStorageTypeSelected();
+    storageTypeSelected = true;
+    return new FileStorageBuilderInMongoGridFsImpl(this, mongoClient);
   }
 }

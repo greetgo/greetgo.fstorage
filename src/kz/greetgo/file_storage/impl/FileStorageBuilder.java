@@ -1,5 +1,6 @@
 package kz.greetgo.file_storage.impl;
 
+import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 
@@ -98,4 +99,13 @@ public interface FileStorageBuilder {
    * @return reference to new builder
    */
   FileStorageBuilderInMongodb inMongodb(MongoCollection<Document> collection);
+
+  /**
+   * Switches to the builder, which will store files in MongoDB GridFS
+   *
+   * @param mongoClient MongoDB's client
+   * @return reference to new builder
+   */
+  FileStorageBuilderInMongoGridFs inMongoGridFs(MongoClient mongoClient);
+
 }

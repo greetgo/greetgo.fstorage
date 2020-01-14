@@ -29,14 +29,14 @@ In Maven
 <dependency>
     <groupId>kz.greetgo</groupId>
     <artifactId>greetgo.fstorage</artifactId>
-    <version>2.0.1</version>
+    <version>2.1.1</version>
 </dependency>
 ```
 
 In gradle
 
 ```groovy
-compile "kz.greetgo:greetgo.fstorage:2.1.0"
+compile "kz.greetgo:greetgo.fstorage:2.1.1"
 ```
 
 ## Single relational database usage
