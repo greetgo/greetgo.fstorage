@@ -5,13 +5,13 @@ import com.mongodb.client.result.DeleteResult;
 import kz.greetgo.file_storage.FileDataReader;
 import kz.greetgo.file_storage.FileStorage;
 import kz.greetgo.file_storage.FileStoringOperation;
-import kz.greetgo.file_storage.errors.NoFileMimeType;
 import kz.greetgo.file_storage.errors.NoFileName;
 import kz.greetgo.file_storage.errors.NoFileWithId;
-import kz.greetgo.file_storage.errors.UnknownMimeType;
 import org.bson.Document;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -19,7 +19,9 @@ import java.util.function.Function;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Projections.include;
-import static kz.greetgo.file_storage.impl.MongoUtil.*;
+import static kz.greetgo.file_storage.impl.MongoUtil.toByteArray;
+import static kz.greetgo.file_storage.impl.MongoUtil.toDate;
+import static kz.greetgo.file_storage.impl.MongoUtil.toStr;
 
 class FileStorageMongodb implements FileStorage {
   private final FileStorageBuilderInMongodbImpl builder;
@@ -114,6 +116,15 @@ class FileStorageMongodb implements FileStorage {
       public String id() {
         return fileId;
       }
+
+      @Override
+      public void writeTo(OutputStream out) {
+        try {
+          out.write(dataAsArray());
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      }
     };
   }
 
@@ -166,24 +177,7 @@ class FileStorageMongodb implements FileStorage {
       }
 
       String mimeType() {
-        if (builder.parent.mandatoryMimeType && mimeType == null) {
-          throw new NoFileMimeType();
-        }
-
-        if (mimeType != null) {
-          Function<String, Boolean> mimeTypeValidator = builder.parent.mimeTypeValidator;
-          if (mimeTypeValidator != null) {
-            try {
-              if (!mimeTypeValidator.apply(mimeType)) {
-                throw new UnknownMimeType(mimeType);
-              }
-            } catch (Exception e) {
-              throw new UnknownMimeType(mimeType, e);
-            }
-          }
-        }
-
-        return mimeType;
+        return builder.parent.validateMimeType(mimeType);
       }
 
       byte[] data = null;
@@ -232,7 +226,7 @@ class FileStorageMongodb implements FileStorage {
 
         String id = presetFileId;
         if (id == null) {
-          id = builder.parent.idGenerator.get();
+          id = builder.parent.idGenerator(IdGeneratorType.STR13).get();
         }
 
         Date createdAt = this.createdAt;

@@ -14,12 +14,13 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 
 import javax.sql.DataSource;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static kz.greetgo.file_storage.impl.util.MongodbUtil.connectGetCollection;
 import static kz.greetgo.file_storage.impl.util.MongodbUtil.createDatabase;
-import static kz.greetgo.file_storage.impl.util.MongodbUtil.createMongoClient;
 
 public class DataProvidersForTests {
   @BeforeMethod
@@ -135,6 +136,11 @@ public class DataProvidersForTests {
       }
 
       @Override
+      public boolean isMongoGridFs() {
+        return true;
+      }
+
+      @Override
       public FileStorage build() {
 
         if (!MongodbUtil.hasMongodb()) {
@@ -143,6 +149,7 @@ public class DataProvidersForTests {
 
         return getBuilder()
           .configureFrom(this)
+          .setIdGenerator(30, () -> generateIdForObjectId())
           .inMongoGridFs(createDatabase("test_grid_fs"))
           .bucketName(getTable())
           .build()
@@ -154,6 +161,14 @@ public class DataProvidersForTests {
         return "MongoDB GridFS";
       }
     };
+  }
+
+  private static final Random rnd = new SecureRandom();
+
+  private String generateIdForObjectId() {
+    byte[] bytes12 = new byte[12];
+    rnd.nextBytes(bytes12);
+    return HexUtil.bytesToHex(bytes12);
   }
 
   private TestStorageBuilder testBuilderForMultiDb(DbType dbType) {

@@ -12,10 +12,13 @@ import kz.greetgo.file_storage.impl.jdbc.structure.FieldType;
 import kz.greetgo.file_storage.impl.jdbc.structure.Table;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Date;
 import java.util.function.Function;
 
+import static kz.greetgo.file_storage.impl.IdGeneratorType.STR13;
 import static kz.greetgo.file_storage.impl.LocalUtil.readAll;
 
 public class FileStorageMultiDbLogic implements FileStorage {
@@ -33,6 +36,7 @@ public class FileStorageMultiDbLogic implements FileStorage {
 
   @Override
   public FileStoringOperation storing() {
+    //noinspection DuplicatedCode
     return new FileStoringOperation() {
       final CreateNewParams params = new CreateNewParams();
 
@@ -109,7 +113,7 @@ public class FileStorageMultiDbLogic implements FileStorage {
 
         String fileId = params.presetFileId;
         if (fileId == null) {
-          fileId = parent.idGenerator.get();
+          fileId = parent.idGenerator(STR13).get();
         }
 
         try {
@@ -179,6 +183,15 @@ public class FileStorageMultiDbLogic implements FileStorage {
       @Override
       public String id() {
         return params.id;
+      }
+
+      @Override
+      public void writeTo(OutputStream out) {
+        try {
+          out.write(dataAsArray());
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
       }
     };
   }

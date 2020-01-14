@@ -10,6 +10,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import static kz.greetgo.file_storage.impl.IdGeneratorType.STR13;
+
 public class MonoDbOperationsPostgres extends AbstractMonoDbOperations {
   MonoDbOperationsPostgres(FileStorageBuilderMonoDbImpl builder) {
     super(builder);
@@ -42,7 +44,7 @@ public class MonoDbOperationsPostgres extends AbstractMonoDbOperations {
           .go()
         ;
 
-        String id = params.presetFileId != null ? params.presetFileId : builder.parent.idGenerator.get();
+        String id = params.presetFileId != null ? params.presetFileId : builder.parent.idGenerator(STR13).get();
 
         try {
           Inserting.with(connection)

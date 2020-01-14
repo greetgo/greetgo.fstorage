@@ -11,10 +11,12 @@ import kz.greetgo.file_storage.errors.UnknownMimeType;
 import kz.greetgo.file_storage.impl.util.RND;
 import kz.greetgo.file_storage.impl.util.TestStorageBuilder;
 import org.fest.assertions.api.Assertions;
+import org.testng.SkipException;
 import org.testng.annotations.Test;
 
-import java.nio.charset.StandardCharsets;
+import java.io.ByteArrayOutputStream;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singletonList;
 import static kz.greetgo.file_storage.impl.util.TestUtil.createFrom;
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -56,9 +58,13 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
   public void checkNameNotMandatory(TestStorageBuilder builder) {
     FileStorage fileStorage = builder.build();
 
+    if (builder.isMongoGridFs()) {
+      throw new SkipException("In MongoGridFs always fileName is mandatory");
+    }
+
     String content = "Привет " + RND.str(500);
     String fileId = fileStorage.storing()
-      .data(content.getBytes(StandardCharsets.UTF_8))
+      .data(content.getBytes(UTF_8))
       .store();
 
     assertThat(fileId).isNotNull();
@@ -67,7 +73,7 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
     FileDataReader reader = fileStorage.read(fileId);
     assertThat(reader).isNotNull();
     assertThat(reader.id()).isEqualTo(fileId);
-    assertThat(new String(reader.dataAsArray(), StandardCharsets.UTF_8)).isEqualTo(content);
+    assertThat(new String(reader.dataAsArray(), UTF_8)).isEqualTo(content);
     assertThat(reader.name()).isNull();
   }
 
@@ -120,7 +126,7 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
     String name = RND.str(10);
 
     String fileId = fileStorage.storing()
-      .data(content.getBytes(StandardCharsets.UTF_8))
+      .data(content.getBytes(UTF_8))
       .name(name)
       .store();
 
@@ -140,7 +146,7 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
     String name = RND.str(10) + ".txt";
 
     String fileId = fileStorage.storing()
-      .data(content.getBytes(StandardCharsets.UTF_8))
+      .data(content.getBytes(UTF_8))
       .name(name)
       .store();
 
@@ -160,7 +166,7 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
     String name = RND.str(10) + ".left_extension";
 
     String fileId = fileStorage.storing()
-      .data(content.getBytes(StandardCharsets.UTF_8))
+      .data(content.getBytes(UTF_8))
       .name(name)
       .store();
 
@@ -170,6 +176,11 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
 
   @Test(dataProvider = "testStorageBuilder_DP", expectedExceptions = NoFileWithId.class)
   public void deleteFile_NoFileWithId(TestStorageBuilder builder) {
+
+    if (builder.isMongoGridFs()) {
+      throw new SkipException("NoFileWithId is unsupported for MongoGridFs");
+    }
+
     builder.build().delete(RND.str(10));
   }
 
@@ -193,4 +204,78 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
 
     assertThat(fileStorage.readOrNull(fileId)).isNull();
   }
+
+  @Test(dataProvider = "testStorageBuilder_DP")
+  public void sameFileName(TestStorageBuilder builder) {
+    FileStorage fileStorage = builder.build();
+
+    String fileName = RND.str(10);
+
+    String content1 = "Привет " + RND.str(10);
+    String content2 = "Привет " + RND.str(10);
+
+    String fileId1 = fileStorage.storing()
+      .data(content1.getBytes(UTF_8))
+      .name(fileName)
+      .store();
+
+    String fileId2 = fileStorage.storing()
+      .data(content2.getBytes(UTF_8))
+      .name(fileName)
+      .store();
+
+    FileDataReader reader1 = fileStorage.read(fileId1);
+    FileDataReader reader2 = fileStorage.read(fileId2);
+
+    String actual1 = new String(reader1.dataAsArray(), UTF_8);
+    String actual2 = new String(reader2.dataAsArray(), UTF_8);
+
+    assertThat(actual1).isEqualTo(content1);
+    assertThat(actual2).isEqualTo(content2);
+    assertThat(reader1.name()).isEqualTo(fileName);
+    assertThat(reader2.name()).isEqualTo(fileName);
+  }
+
+  @Test(dataProvider = "testStorageBuilder_DP")
+  public void store_and_read_using_dataAsArray(TestStorageBuilder builder) {
+    FileStorage fileStorage = builder.build();
+
+    String fileName = RND.str(10);
+    String content = RND.str(100);
+
+    String fileId = fileStorage.storing()
+      .data(content.getBytes(UTF_8))
+      .name(fileName)
+      .store();
+
+    byte[] bytes = fileStorage.read(fileId).dataAsArray();
+
+    String actual = new String(bytes, UTF_8);
+
+    assertThat(actual).isEqualTo(content);
+
+  }
+
+  @Test(dataProvider = "testStorageBuilder_DP")
+  public void store_and_read_using_writeTo(TestStorageBuilder builder) {
+    FileStorage fileStorage = builder.build();
+
+    String fileName = RND.str(10);
+    String content = RND.str(100);
+
+    String fileId = fileStorage.storing()
+      .data(content.getBytes(UTF_8))
+      .name(fileName)
+      .store();
+
+    ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+    fileStorage.read(fileId).writeTo(bOut);
+
+    String actual = new String(bOut.toByteArray(), UTF_8);
+
+    assertThat(actual).isEqualTo(content);
+
+  }
+
 }

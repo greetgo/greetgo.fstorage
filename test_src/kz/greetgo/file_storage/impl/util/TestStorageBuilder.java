@@ -102,4 +102,8 @@ public abstract class TestStorageBuilder implements FileStorageBuilderConfigurat
     if (mimeTypeValidator != null) builder.mimeTypeValidator(mimeTypeValidator);
     if (mimeTypeExtractor != null) builder.mimeTypeExtractor(mimeTypeExtractor);
   }
+
+  public boolean isMongoGridFs() {
+    return false;
+  }
 }

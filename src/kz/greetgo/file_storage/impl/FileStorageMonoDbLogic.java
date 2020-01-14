@@ -6,7 +6,9 @@ import kz.greetgo.file_storage.FileStoringOperation;
 import kz.greetgo.file_storage.errors.NoFileData;
 import kz.greetgo.file_storage.errors.NoFileWithId;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Date;
 import java.util.function.Function;
 
@@ -173,6 +175,15 @@ public class FileStorageMonoDbLogic implements FileStorage {
       @Override
       public String id() {
         return params.id;
+      }
+
+      @Override
+      public void writeTo(OutputStream out) {
+        try {
+          out.write(dataAsArray());
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
       }
     };
   }

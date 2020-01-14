@@ -6,6 +6,10 @@ public interface FileStorageBuilderInMongoGridFs {
 
   FileStorageBuilderInMongoGridFs bucketName(String bucketName);
 
+  FileStorageBuilderInMongoGridFs chinkSizeBytes(Integer chinkSizeBytes);
+
+  FileStorageBuilderInMongoGridFs useObjectId(boolean useObjectId);
+
   FileStorage build();
 
 }

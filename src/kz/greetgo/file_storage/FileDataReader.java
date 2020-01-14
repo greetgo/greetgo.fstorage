@@ -1,5 +1,6 @@
 package kz.greetgo.file_storage;
 
+import java.io.OutputStream;
 import java.util.Date;
 
 /**
@@ -19,6 +20,13 @@ public interface FileDataReader {
    * @return file content as byte array
    */
   byte[] dataAsArray();
+
+  /**
+   * Writes file all content into output stream
+   *
+   * @param out output stream to load file content
+   */
+  void writeTo(OutputStream out);
 
   /**
    * Reads file creation date-time

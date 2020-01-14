@@ -10,10 +10,8 @@ import kz.greetgo.file_storage.errors.UnknownMimeType;
 import org.bson.Document;
 
 import javax.sql.DataSource;
-import java.security.SecureRandom;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -56,26 +54,12 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
     }
   }
 
-  private static class DefaultIdGenerator implements Supplier<String> {
-    @SuppressWarnings("SpellCheckingInspection")
-    private static final String ENG = "abcdefghijklmnopqrstuvwxyz";
-    private static final String DEG = "0123456789";
-    private final char[] ALL = (ENG.toLowerCase() + ENG.toUpperCase() + DEG).toCharArray();
-    private final Random RND = new SecureRandom();
+  private Supplier<String> idGenerator = null;
 
-    @Override
-    public String get() {
-      final int len = 13;
-      char[] ret = new char[len];
-      int length = ALL.length;
-      for (int i = 0; i < len; i++) {
-        ret[i] = ALL[RND.nextInt(length)];
-      }
-      return new String(ret);
-    }
+  Supplier<String> idGenerator(IdGeneratorType generatorType) {
+    Supplier<String> ret = this.idGenerator;
+    return ret != null ? ret : generatorType.generator;
   }
-
-  Supplier<String> idGenerator = new DefaultIdGenerator();
 
   @SuppressWarnings({"FieldCanBeLocal", "unused"})
   private boolean setIdGeneratorWasCalled = false;
@@ -177,4 +161,25 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
     return new FileStorageBuilderInMongoGridFsImpl(this, database);
   }
 
+
+  String validateMimeType(String mimeType) {
+    if (mandatoryMimeType && mimeType == null) {
+      throw new NoFileMimeType();
+    }
+
+    if (mimeType != null) {
+      Function<String, Boolean> mimeTypeValidator = this.mimeTypeValidator;
+      if (mimeTypeValidator != null) {
+        try {
+          if (!mimeTypeValidator.apply(mimeType)) {
+            throw new UnknownMimeType(mimeType);
+          }
+        } catch (Exception e) {
+          throw new UnknownMimeType(mimeType, e);
+        }
+      }
+    }
+
+    return mimeType;
+  }
 }

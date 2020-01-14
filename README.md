@@ -48,9 +48,9 @@ public class FileStorageFactory {
     
     kz.greetgo.file_storage.FileStorage fileStorage = FileStorageBuilder
       .newBuilder()
-      .mandatoryMimeType(true)//make defining mime type mandatory
-      .mandatoryName(true)//make defining file name mandatory
-      .inDb(dataSource)//define place to store files
+      .mandatoryMimeType(true)
+      .mandatoryName(true)
+      .inDb(dataSource)
       .build();
     
     return fileStorage;
@@ -70,9 +70,9 @@ public class FileStorageFactory {
     
     kz.greetgo.file_storage.FileStorage fileStorage = FileStorageBuilder
       .newBuilder()
-      .mandatoryMimeType(true)//make defining mime type mandatory
-      .mandatoryName(true)//make defining file name mandatory
-      .inMultiDb(Arrays.asList(dataSource1, dataSource2, dataSource3))//define place to store files
+      .mandatoryMimeType(true)
+      .mandatoryName(true)
+      .inMultiDb(Arrays.asList(dataSource1, dataSource2, dataSource3))
       .build();
     
     return fileStorage;
@@ -89,9 +89,28 @@ public class FileStorageFactory {
     
     kz.greetgo.file_storage.FileStorage fileStorage = FileStorageBuilder
       .newBuilder()
-      .mandatoryMimeType(true)//make defining mime type mandatory
-      .mandatoryName(true)//make defining file name mandatory
-      .inMongodb(collection)//define place to store files
+      .mandatoryMimeType(true)
+      .mandatoryName(true)
+      .inMongodb(collection)
+      .build();
+    
+    return fileStorage;
+  }
+}
+```
+
+## MongoDB with GridFS usage
+
+```java
+public class FileStorageFactory {
+  public static FileStorage getFileStorage() {
+    com.mongodb.client.MongoDatabase database = getDatabaseForFileStorage();
+    
+    kz.greetgo.file_storage.FileStorage fileStorage = FileStorageBuilder
+      .newBuilder()
+      .mandatoryMimeType(true)
+      .mandatoryName(true)
+      .inMongoGridFs(database)
       .build();
     
     return fileStorage;
@@ -108,8 +127,6 @@ import kz.greetgo.file_storage.FileStorage;
 
 public class Examples {
   public static void main(String[] args) {
-    javax.sql.DataSource dataSource = getCoolDataSource();
-    
     FileStorage fileStorage = getFileStorage();
     
     String fileId = fileStorage.storing()

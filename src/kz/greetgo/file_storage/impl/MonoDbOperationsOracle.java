@@ -9,6 +9,8 @@ import kz.greetgo.file_storage.impl.jdbc.Query;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import static kz.greetgo.file_storage.impl.IdGeneratorType.STR13;
+
 public class MonoDbOperationsOracle extends MonoDbOperationsPostgres {
   MonoDbOperationsOracle(FileStorageBuilderMonoDbImpl builder) {
     super(builder);
@@ -75,7 +77,7 @@ public class MonoDbOperationsOracle extends MonoDbOperationsPostgres {
           }
         }
 
-        String id = params.presetFileId != null ? params.presetFileId : builder.parent.idGenerator.get();
+        String id = params.presetFileId != null ? params.presetFileId : builder.parent.idGenerator(STR13).get();
 
         try {
           Inserting.with(connection)

@@ -12,7 +12,7 @@ group = 'kz.greetgo'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
-version = '2.1.1'
+version = '2.2.0' // Added MongoDB with GridFS
 
 def ggRepo = System.getenv('GG_REPO')?.trim()
 if (!ggRepo) ggRepo = System.getProperty('GG_REPO')?.trim()
