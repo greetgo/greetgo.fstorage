@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static kz.greetgo.file_storage.impl.util.MongodbUtil.connectGetCollection;
+import static kz.greetgo.file_storage.impl.util.MongodbUtil.createDatabase;
 import static kz.greetgo.file_storage.impl.util.MongodbUtil.createMongoClient;
 
 public class DataProvidersForTests {
@@ -142,7 +143,7 @@ public class DataProvidersForTests {
 
         return getBuilder()
           .configureFrom(this)
-          .inMongoGridFs(createMongoClient())
+          .inMongoGridFs(createDatabase("test_grid_fs"))
           .bucketName(getTable())
           .build()
           ;

@@ -1,7 +1,7 @@
 package kz.greetgo.file_storage.impl;
 
-import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import kz.greetgo.file_storage.errors.MultipleBuilderUsage;
 import kz.greetgo.file_storage.errors.NoFileMimeType;
 import kz.greetgo.file_storage.errors.NoFileName;
@@ -12,6 +12,7 @@ import org.bson.Document;
 import javax.sql.DataSource;
 import java.security.SecureRandom;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -169,9 +170,11 @@ class FileStorageBuilderImpl implements FileStorageBuilder {
   }
 
   @Override
-  public FileStorageBuilderInMongoGridFs inMongoGridFs(MongoClient mongoClient) {
+  public FileStorageBuilderInMongoGridFs inMongoGridFs(MongoDatabase database) {
+    Objects.requireNonNull(database, "Not specified database (== null)");
     checkStorageTypeSelected();
     storageTypeSelected = true;
-    return new FileStorageBuilderInMongoGridFsImpl(this, mongoClient);
+    return new FileStorageBuilderInMongoGridFsImpl(this, database);
   }
+
 }

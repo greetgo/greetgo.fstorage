@@ -1,16 +1,17 @@
 package kz.greetgo.file_storage.impl;
 
-import com.mongodb.MongoClient;
+import com.mongodb.client.MongoDatabase;
 import kz.greetgo.file_storage.FileStorage;
 
 public class FileStorageBuilderInMongoGridFsImpl implements FileStorageBuilderInMongoGridFs {
+
   final FileStorageBuilderImpl parent;
-  final MongoClient mongoClient;
+  final MongoDatabase database;
   String bucketName;
 
-  public FileStorageBuilderInMongoGridFsImpl(FileStorageBuilderImpl parent, MongoClient mongoClient) {
+  public FileStorageBuilderInMongoGridFsImpl(FileStorageBuilderImpl parent, MongoDatabase database) {
     this.parent = parent;
-    this.mongoClient = mongoClient;
+    this.database = database;
   }
 
   @Override

@@ -17,14 +17,19 @@ public class MongodbUtil {
     return new MongoClient();
   }
 
-  public static MongoCollection<Document> connectGetCollection(String collectionName) {
+  public static MongoDatabase createDatabase(String collectionName) {
     MongoClient mongoClient = createMongoClient();
-    MongoDatabase database = mongoClient.getDatabase(System.getProperty("user.name") + "_" + collectionName);
+    return mongoClient.getDatabase(System.getProperty("user.name") + "_" + collectionName);
+  }
+
+  public static MongoCollection<Document> connectGetCollection(String collectionName) {
+    MongoDatabase database = createDatabase(collectionName);
     return database.getCollection("fileStorage");
   }
 
   private static final AtomicReference<Boolean> cachedHasMongodbResult = new AtomicReference<>(null);
 
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   public static boolean hasMongodb() {
     {
       Boolean result = cachedHasMongodbResult.get();
