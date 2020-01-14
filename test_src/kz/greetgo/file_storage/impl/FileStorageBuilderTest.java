@@ -58,10 +58,6 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
   public void checkNameNotMandatory(TestStorageBuilder builder) {
     FileStorage fileStorage = builder.build();
 
-    if (builder.isMongoGridFs()) {
-      throw new SkipException("In MongoGridFs always fileName is mandatory");
-    }
-
     String content = "Привет " + RND.str(500);
     String fileId = fileStorage.storing()
       .data(content.getBytes(UTF_8))
@@ -74,7 +70,9 @@ public class FileStorageBuilderTest extends DataProvidersForTests {
     assertThat(reader).isNotNull();
     assertThat(reader.id()).isEqualTo(fileId);
     assertThat(new String(reader.dataAsArray(), UTF_8)).isEqualTo(content);
-    assertThat(reader.name()).isNull();
+    if (!builder.isMongoGridFs()) {
+      assertThat(reader.name()).isNull();
+    }
   }
 
   @Test(expectedExceptions = NoFileMimeType.class, dataProvider = "testStorageBuilder_DP")
