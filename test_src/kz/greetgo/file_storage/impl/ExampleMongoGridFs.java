@@ -15,7 +15,9 @@ public class ExampleMongoGridFs {
 
     FileStorage fileStorage = FileStorageBuilder
       .newBuilder()
+//      .setIdGenerator(35, () -> RND.str(10))
       .inMongoGridFs(db)
+//      .useObjectId(false)
       .build();
 
     String content1 = RND.str(100);
